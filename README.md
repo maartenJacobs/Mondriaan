@@ -70,15 +70,15 @@ Start from the initial vertex with DP=right and CC=left.
 2. Travel from the selected vertex to the next vertex, following the edge labelled with the current DP and CC pair.
 3. If the selected edge has a new DP and CC combination, set DP and CC to this new combination.
 4. On each new vertex, determine the operation:
-    a) If the vertex is a terminal vertex:
+    1. If the vertex is a terminal vertex:
         1. Close the open sequence collection.
         2. Create a new function with the closed sequence collection.
         3. Return the new function name.
-    b) If the operation is a pointer:
+    2. If the operation is a pointer:
         1. Close the open sequence collection
         2. If the closed sequence including the pointer exists as a function:
             a. YES: translate as a function call. Return existing function name.
             b. NO: create a new function and translate the operation block as its block. Add 4 PHI calls (?) for each new possible DP and CC combination. Recursively execute the algorithm starting from the pointer vertex, with each new pair; each returned function is then called from the relevant PHI call (?). Return new function name.
-    c) If the operation is a switch:
-    d) If the operation is not a pointer/switch, add the operation to the
+    3. If the operation is a switch:
+    4. If the operation is not a pointer/switch, add the operation to the
         open sequence collection.
