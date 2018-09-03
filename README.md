@@ -2,7 +2,49 @@
 
 Mondriaan is an LLVM-based compiler for the Piet programming language. It is currently in development. Please do not use in production.
 
+## Usage
+
+```
+Usage: Mondriaan [--emit-llvm] [-S] -o output_file source_file
+```
+
+## Architecture
+
+In a nutshell: Source file => [ Parser ] => PietGraph => [ Translator ] => LLVM IR => [ LLVM ]
+
+The Mondriaan compiler accepts a Piet source file, parses the file into a directed cyclic 
+graph and translates the graph into LLVM IR. The LLVM IR is then passed to the LLVM optimiser,
+and backend to generate an executable file.
+
 ## Algorithm
+
+The Mondriaan compiler transforms the Piet source file into a directed cyclic graph:
+
+* The vertices of the graph represent the codel blocks of the source file. The vertices 
+have an integer size and a color. 1 vertex is marked the initial vertex; this is the topleft
+codel block in the source file. Several vertices can be marked as terminal vertices; these
+vertices have no edges coming out of them. All non-terminal edges have exactly 8 edges,
+representing all possible paths from the vertex to the next.
+* The edges of the graph represent the paths between codel blocks and are labeled with a 
+Direction Pointer and Codel Chooser. Each edge represents 1 path between 2 vertices. A vertex 
+can have a change directive, specifying a new Direction Pointer and Codel Chooser.
+
+Using this graph, the compiler walks the graph starting with the initial graph, an open 
+function (initially "main"), a Direction Pointer of Right and a Codel Chooser of Left. 
+The compiler then selects the edge of the initial vertex labeled with the initial Direction 
+Pointer and Codel Chooser pair. As each new vertex is visited, an LLVM basic block is 
+constructed to collect the instructions represented by the path taken by the compiler.
+
+When a terminal vertex is encountered, the current block is closed, the function is
+constructed using the block, and the function is called from the currently open function.
+
+When a "pointer" or "switch" instruction is visited, the block is put in a half-open position:
+2 to 4 function calls are added, depending on the instruction, but we construct the function
+from the block and call it from the currently open function. Then the half-open block becomes
+the currently open block. The translation algorithm is then executed for each possible path
+from the current codel block, becoming the described function calls.
+
+### Graph construction
 
 ### Requirements
 
