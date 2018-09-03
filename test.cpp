@@ -117,12 +117,16 @@ namespace Piet {
         class Parser {
         public:
             Parser(Image *image) : image(image) {}
-            Step *parseNext();
+            Piet::Parse::Graph *parse();
         private:
             Image *image;
             DirectionPointerDirection dpDirection = DPRight;
             CodelChooserDirection ccDirection = CCLeft;
             // ChooseCodel 
+        };
+
+        class Graph {
+
         };
     }
 
@@ -265,15 +269,38 @@ bool Piet::Parse::Read::PNG::isValidPNGFile(FILE *png, png_structp *png_ptr, png
     return true;
 }
 
-Piet::Parse::Step *Piet::Parse::Parser::parseNext() {
+Piet::Parse::Graph *Piet::Parse::Parser::parse() {
+    // Create a new graph node.
+    //
+    // Fill the codel with the control color.
+    // Whilst doing so:
+    //  - collect the color of the codel => node.color
+    //  - count the number of pixels => node.size
+    //  - mark the position (x, y) as belonging the current codel block
+    //  - collect the 8 exit points of the codel block, which lie outside the codel block
+    //      Each exit point must be marked with the Direction Pointer and Codel Chooser
+    //      combination.
 
-    // Check if parsing ended already.
 
-    // Up to 8 times:
-        // flood fill + walk border
-        // reset color of block
+    // For each 8 exit points that are unvisited, create the graph node starting from that point.
 
-    return nullptr;
+
+    // Result: an array of unconnected graph nodes.
+    // For every unconnected graph node:
+    //      For every exit point:
+    //          If the exit point is within the graph,
+    //          connect the edge of the unconnected node to the node of the exit point
+    //          using the DP + CC pair of the exit point.
+    //          Add no change directive to the edge.
+    //
+    //          If the exit point is not within the graph, get the next
+    //          exit point (in DP + CC order of rotation) that is within the graph
+    //          and connect the edge of the unconnected node to the node of the
+    //          exit point. Add a change directive to the edge, matching the DP + CC
+    //          pair of the exit point within the graph.
+    //
+    //          If there is no exit point within the graph, mark the node as a terminal
+    //          node and mark it connected.
 }
 
 int main() {
@@ -281,15 +308,6 @@ int main() {
 
     Piet::Parse::Reader reader;
     auto image = reader.readFromFile("PietHello.png");
-    auto parser = new Piet::Parse::Parser(image);
-
-    Piet::Parse::Step *nextStep = parser->parseNext();
-    
-    if (!nextStep) {
-        cout << "No next step" << endl;
-    } else {
-        cout << "There is a next step!" << endl;
-    }
 
     return 0;
 }
