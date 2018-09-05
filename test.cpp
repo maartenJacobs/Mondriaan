@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstdio>
 #include <cassert>
-#include "png.h"
+#include <png.h>
 
 using namespace std;
 
