@@ -10,7 +10,7 @@ Usage: Mondriaan [--emit-llvm] [-S] -o output_file source_file
 
 ## Architecture
 
-In a nutshell: Source file => [ Parser ] => PietGraph => [ Translator ] => LLVM IR => [ LLVM ]
+In a nutshell: Source file => \[ Parser ] => PietGraph => \[ Translator ] => LLVM IR => \[ LLVM ]
 
 The Mondriaan compiler accepts a Piet source file, parses the file into a directed cyclic 
 graph and translates the graph into LLVM IR. The LLVM IR is then passed to the LLVM optimiser,
@@ -78,7 +78,17 @@ Start from the initial vertex with DP=right and CC=left.
         1. Close the open sequence collection
         2. If the closed sequence including the pointer exists as a function:
             a. YES: translate as a function call. Return existing function name.
-            b. NO: create a new function and translate the operation block as its block. Add 4 PHI calls (?) for each new possible DP and CC combination. Recursively execute the algorithm starting from the pointer vertex, with each new pair; each returned function is then called from the relevant PHI call (?). Return new function name.
+            b. NO: create a new function and translate the operation block as its block.
+            Add 4 PHI calls (?) for each new possible DP and CC combination. Recursively execute the algorithm
+            starting from the pointer vertex, with each new pair; each returned function is then called from the
+            relevant PHI call (?). Return new function name.
     3. If the operation is a switch:
+        1. Close the open sequence collection
+        2. If the closed sequence including the pointer exists as a function:
+            a. YES: translate as a function call. Return existing function name.
+            b. NO: create a new function and translate the operation block as its block.
+            Add 2 PHI calls (?) for each new possible DP and CC combination. Recursively execute the algorithm
+            starting from the pointer vertex, with each new pair; each returned function is then called from the
+            relevant PHI call (?). Return new function name.
     4. If the operation is not a pointer/switch, add the operation to the
         open sequence collection.
