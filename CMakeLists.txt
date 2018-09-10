@@ -19,13 +19,27 @@ add_executable(test test.cpp
         src/Reader.cpp
         src/PNG.cpp
         src/Parser.cpp
-        src/Graph.cpp)
+        src/Graph.cpp
+        src/Translator.cpp)
 
 # Include PNG
 find_package(PNG MODULE REQUIRED)
-target_link_libraries(test PUBLIC PNG::PNG)
 include_directories(${PNG_INCLUDE_DIRS})
 link_directories(${PNG_LIBRARY_DIRS})
+
+# Include LLVM
+# Copied from https://llvm.org/docs/CMake.html#embedding-llvm-in-your-project
+find_package(LLVM REQUIRED CONFIG)
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+llvm_map_components_to_libnames(llvm_libs support core)
+message(STATUS "Using llvm libs: ${llvm_libs}")
+include_directories(${LLVM_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
+link_directories(${llvm_libs})
+
+
+target_link_libraries(test PUBLIC PNG::PNG ${llvm_libs})
 
 # Configure debug builds (so many segmentation faults)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wpedantic -g -O0")

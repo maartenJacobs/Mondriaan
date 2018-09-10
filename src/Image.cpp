@@ -19,7 +19,10 @@ namespace Piet::Parse {
         assert(position->row < rows);
         assert(position->column < columns);
 
-        cellOwners[position->row * position->column + position->column] = owner;
+        size_t offset = position->row * columns + position->column;
+        assert(cellOwners[offset] == 0);
+
+        cellOwners[offset] = owner;
     }
 
     Color Image::at(Position *position) {
@@ -27,7 +30,7 @@ namespace Piet::Parse {
     }
 
     uint32_t Image::ownerAt(Position *position) {
-        return cellOwners[position->row * position->column + position->column];
+        return cellOwners[position->row * columns + position->column];
     }
 
     bool Image::in(Position *position) {

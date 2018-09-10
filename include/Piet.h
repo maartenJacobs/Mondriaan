@@ -55,6 +55,9 @@ namespace Piet {
         LeftTop,
     };
 
+    const uint8_t MIN_DIRECTION_POINT = TopLeft;
+    const uint8_t MAX_DIRECTION_POINT = LeftTop;
+
     namespace Parse {
         struct Position {
             uint32_t row;
@@ -117,23 +120,39 @@ namespace Piet {
             Image *image;
         };
 
+        struct GraphStep {
+            GraphNode *previous;
+            GraphNode *next;
+        };
+
         class Graph {
         public:
             Graph(vector<GraphNode *> nodes, GraphNode *initialNode)
                 : nodes(nodes), initialNode(initialNode) {}
+            GraphStep *walk();
+            void restartWalk(GraphNode *fromNode, DirectionPoint inDirection);
         private:
             vector<GraphNode *> nodes;
-            GraphNode *initialNode;
+            GraphNode *initialNode = nullptr;
+            GraphNode *currentNode = nullptr;
+            DirectionPoint currentDirection = RightTop;
         };
 
         class GraphEdge {
         public:
             GraphEdge(DirectionPoint *newDirection)
-                : newDirection(newDirection), target(nullptr) {}
+                : newDirection(newDirection), target(nullptr) {
+                assert(*newDirection >= MIN_DIRECTION_POINT && *newDirection <= MAX_DIRECTION_POINT);
+            }
             GraphEdge(DirectionPoint *newDirection, GraphNode *target)
-                : newDirection(newDirection), target(target) {}
+                : newDirection(newDirection), target(target) {
+                assert(*newDirection >= MIN_DIRECTION_POINT && *newDirection <= MAX_DIRECTION_POINT);
+            }
 
             bool isRedirect();
+
+            DirectionPoint *getNewDirection();
+            GraphNode *getTarget();
         private:
             DirectionPoint *newDirection;
             GraphNode *target;
@@ -144,24 +163,26 @@ namespace Piet {
             GraphNode(Color color, uint32_t size) : color(color), size(size) {}
             void markAsInitial();
             void markAsTerminal();
+            bool isTerminal();
+            bool isInitial();
             void connect(DirectionPoint direction, GraphEdge *edge);
             GraphEdge *edgeForDirection(DirectionPoint direction);
+            Color getColor();
+            uint32_t getSize();
         private:
             Color color;
             uint32_t size;
             unordered_map<DirectionPoint, GraphEdge *> edges;
-            bool isTerminal = false;
-            bool isInitial = false;
+            bool terminal = false;
+            bool initial = false;
         };
     }
 
-    namespace Translate {
-        class LLVM {
-        public:
-            LLVM(Piet::Parse::Parser *parser) : parser(parser) {}
-            void translateToObjectFile(string outputFilename);
-        private:
-            Piet::Parse::Parser *parser;
-        };
-    }
+    class Translator {
+    public:
+        Translator(Parse::Graph *graph) : graph(graph) {}
+        void translateToExecutable(string filename);
+    private:
+        Parse::Graph *graph;
+    };
 }

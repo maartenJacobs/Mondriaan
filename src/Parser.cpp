@@ -216,7 +216,7 @@ namespace Piet::Parse {
         if (owner->color == Black) {
             return new GraphEdge(new DirectionPoint{nextDirection(exit->getDirection())});
         } else {
-            return new GraphEdge(new DirectionPoint{nextDirection(exit->getDirection())}, owner->constructingNode);
+            return new GraphEdge(new DirectionPoint{exit->getDirection()}, owner->constructingNode);
         }
     }
 
@@ -246,6 +246,7 @@ namespace Piet::Parse {
             CodelBlock *block = visitBlock(cellOwner, image, position);
             block->constructingNode = new GraphNode(block->color, block->size);
             blocks.push_back(block);
+            assert(blocks.at(cellOwner - 1) == block);
 
             // For each 8 exit points that are unvisited, create a graph node starting from that point.
             if (block->topLeftExit->next()) {
