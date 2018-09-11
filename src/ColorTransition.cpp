@@ -20,7 +20,7 @@ namespace Piet {
         Parse::Position *currentPosition = nullptr;
 
         for (uint8_t row = 0; row < 3; row++) {
-            for (uint8_t column = 0; row < 6; row++) {
+            for (uint8_t column = 0; column < 6; column++) {
                 Color colorAt = colorTable[row][column];
                 if (colorAt == previousColor) {
                     previousPosition = new Parse::Position{row, column};
@@ -42,7 +42,7 @@ namespace Piet {
 
         // Determine the lightness change.
         if (currentPosition->row < previousPosition->row) {
-            currentPosition->row += 6;
+            currentPosition->row += 3;
         }
         auto lightnessChange = (LightnessChange)(currentPosition->row - previousPosition->row);
 

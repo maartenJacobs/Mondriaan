@@ -26,7 +26,6 @@ using namespace std;
 using namespace llvm;
 
 namespace Piet {
-
     void Translator::translateToExecutable(string filename) {
         LLVMContext Context;
         IRBuilder<> Builder(Context);
@@ -40,13 +39,25 @@ namespace Piet {
             cout << "next color: " << step->next->getColor() << "; next size: " << step->next->getSize() << endl;
 
             // Determine operation from step.
-            if (step->next->getColor() == White || step->next->getColor() == Black) {
+            auto transition = ColorTransition::determineTransition(step->previous, step->next);
+            if (transition == nullptr) {
                 // No operation.
+                cout << "No operation" << endl;
             } else {
-                auto transition = ColorTransition::determineTransition(step->previous, step->next);
+                assert(transition->getHueChange() < operationTable.size());
+                assert(transition->getLightnessChange() < operationTable[transition->getHueChange()].size());
+                string operation = operationTable[transition->getHueChange()][transition->getLightnessChange()];
+                assert(operation != "");
+                cout << "Operation: " << operationTable[transition->getHueChange()][transition->getLightnessChange()] << endl;
             }
 
+
             // End sequence if terminal node.
+            if (step->next->isTerminal()) {
+                cout << "Terminate!" << endl;
+            }
+
+            cout << endl;
 
         }
 

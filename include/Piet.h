@@ -212,11 +212,30 @@ namespace Piet {
         LightnessChange lightnessChange;
     };
 
+    // FIXME: what can you do with this externally?
+    typedef string OpKeyType;
+    const string OP_NOOP = "noop",
+            OP_PUSH = "push",
+            OP_POP = "pop",
+            OP_ADD = "add",
+            OP_SUBTRACT = "subtract",
+            OP_MULTIPLY = "multiply",
+            OP_OUT_CHAR = "out(char)"
+            ;
+
     class Translator {
     public:
         Translator(Parse::Graph *graph) : graph(graph) {}
         void translateToExecutable(string filename);
     private:
         Parse::Graph *graph;
+        const array<array<OpKeyType, 3>, 6> operationTable = {
+                array<OpKeyType, 3>{OP_NOOP, OP_PUSH, OP_POP},
+                {OP_ADD, OP_SUBTRACT, OP_MULTIPLY},
+                {"divide", "mod", "not"},
+                {"greater", "pointer", "switch"},
+                {"duplicate", "roll", "in(number)"},
+                {"in(char)", "out(number)", OP_OUT_CHAR}
+        };
     };
 }
