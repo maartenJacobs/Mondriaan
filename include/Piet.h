@@ -58,6 +58,21 @@ namespace Piet {
     const uint8_t MIN_DIRECTION_POINT = TopLeft;
     const uint8_t MAX_DIRECTION_POINT = LeftTop;
 
+    enum HueChange {
+        HueChange0,
+        HueChange1,
+        HueChange2,
+        HueChange3,
+        HueChange4,
+        HueChange5,
+    };
+
+    enum LightnessChange {
+        LightnessChange0,
+        LightnessChange1,
+        LightnessChange2,
+    };
+
     namespace Parse {
         struct Position {
             uint32_t row;
@@ -177,6 +192,25 @@ namespace Piet {
             bool initial = false;
         };
     }
+
+    class ColorTransition {
+    public:
+        ColorTransition(HueChange hueChange, LightnessChange lightnessChange)
+            : hueChange(hueChange), lightnessChange(lightnessChange) {}
+
+        /**
+         * @brief Determine the transition that occurs between 2 graph nodes.
+         * @param previous
+         * @param current
+         * @return NULL if there is no transition. An instance of ColorTransition otherwise.
+         */
+        static ColorTransition *determineTransition(Parse::GraphNode *previous, Parse::GraphNode *current);
+        HueChange getHueChange();
+        LightnessChange getLightnessChange();
+    private:
+        HueChange hueChange;
+        LightnessChange lightnessChange;
+    };
 
     class Translator {
     public:

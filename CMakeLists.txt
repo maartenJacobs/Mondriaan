@@ -20,7 +20,8 @@ add_executable(test test.cpp
         src/PNG.cpp
         src/Parser.cpp
         src/Graph.cpp
-        src/Translator.cpp)
+        src/Translator.cpp
+        src/ColorTransition.cpp)
 
 # Include PNG
 find_package(PNG MODULE REQUIRED)

@@ -36,11 +36,18 @@ namespace Piet {
         Parse::GraphStep *step;
 
         while ((step = graph->walk()) != nullptr) {
-            // Determine operation from step.
-            // End sequence if terminal node.
-
             cout << "previous color: " << step->previous->getColor() << "; previous size: " << step->previous->getSize() << endl;
             cout << "next color: " << step->next->getColor() << "; next size: " << step->next->getSize() << endl;
+
+            // Determine operation from step.
+            if (step->next->getColor() == White || step->next->getColor() == Black) {
+                // No operation.
+            } else {
+                auto transition = ColorTransition::determineTransition(step->previous, step->next);
+            }
+
+            // End sequence if terminal node.
+
         }
 
         auto mainFunction = cast<Function>(PietModule->getOrInsertFunction("main",
