@@ -1,3 +1,6 @@
+#ifndef PIET_H
+#define PIET_H
+
 #include <string>
 #include <array>
 #include <vector>
@@ -239,3 +242,5 @@ namespace Piet {
         };
     };
 }
+
+#endif

@@ -1,11 +1,12 @@
 #include "../include/Piet.h"
+
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/Verifier.h>
 
-//#include <llvm/IR/Function.h>
-//#include <llvm/IR/IRBuilder.h>
 //#include <llvm/IR/BasicBlock.h>
 //#include <llvm/IR/LLVMContext.h>
 //#include <llvm/IR/Type.h>
@@ -17,20 +18,30 @@
 //#include <llvm/IR/Module.h>
 //#include <llvm/Support/TargetSelect.h>
 //#include <llvm/Support/TargetRegistry.h>
-//#include <llvm/IR/Verifier.h>
 //#include <llvm/IR/GlobalVariable.h>
 
 #include <iostream>
+#include <unordered_map>
 
 using namespace std;
 using namespace llvm;
 
+
 namespace Piet {
+    const string RUNTIME_PUSH = "push";
+
+    void registerPietGlobals(unique_ptr<Module> module) {
+        // Register push.
+        std::vector<Type *> pushArgs(1, Type::getInt32Ty(module->getContext()));
+        FunctionType *pushType = FunctionType::get(Type::getVoidTy(module->getContext()), pushArgs, false);
+        Function::Create(pushType, Function::InternalLinkage, RUNTIME_PUSH, module.get());
+    }
+
     void Translator::translateToExecutable(string filename) {
         LLVMContext Context;
         IRBuilder<> Builder(Context);
-        unique_ptr<llvm::Module> PietModule = llvm::make_unique<Module>("piet", Context);
-
+        unique_ptr<Module> PietModule = llvm::make_unique<Module>("piet", Context);
+        registerPietGlobals(move(PietModule));
 
         Parse::GraphStep *step;
 
@@ -58,7 +69,6 @@ namespace Piet {
             }
 
             cout << endl;
-
         }
 
         auto mainFunction = cast<Function>(PietModule->getOrInsertFunction("main",
@@ -87,6 +97,7 @@ namespace Piet {
         Builder.CreateRet(ConstantInt::get(Context, APInt(32, 0)));
 
 
+        verifyModule(*(PietModule.get()), &errs());
         PietModule->print(errs(), nullptr);
     }
 }
