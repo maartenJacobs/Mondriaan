@@ -28,23 +28,45 @@ using namespace llvm;
 
 
 namespace Piet {
-    const string RUNTIME_PUSH = "push";
+    Function *push;
+    Function *duplicate;
+    Function *outChar;
 
-    void registerPietGlobals(unique_ptr<Module> module) {
+    void registerPietGlobals(Module &module) {
         // Register push.
-        std::vector<Type *> pushArgs(1, Type::getInt32Ty(module->getContext()));
-        FunctionType *pushType = FunctionType::get(Type::getVoidTy(module->getContext()), pushArgs, false);
-        Function::Create(pushType, Function::InternalLinkage, RUNTIME_PUSH, module.get());
+        std::vector<Type *> pushArgs(1, Type::getInt32Ty(module.getContext()));
+        FunctionType *pushType = FunctionType::get(Type::getVoidTy(module.getContext()), pushArgs, false);
+        push = Function::Create(pushType, Function::ExternalLinkage, "push", &module);
+
+        // Register out(char).
+        FunctionType *outCharType = FunctionType::get(Type::getVoidTy(module.getContext()), vector<Type *>(), false);
+        outChar = Function::Create(outCharType, Function::ExternalLinkage, "out_char", &module);
+
+        // Register duplicate.
+        FunctionType *duplicateType = FunctionType::get(Type::getVoidTy(module.getContext()), vector<Type *>(), false);
+        duplicate = Function::Create(duplicateType, Function::ExternalLinkage, "duplicate", &module);
     }
 
     void Translator::translateToExecutable(string filename) {
         LLVMContext Context;
         IRBuilder<> Builder(Context);
-        unique_ptr<Module> PietModule = llvm::make_unique<Module>("piet", Context);
-        registerPietGlobals(move(PietModule));
+        Module PietModule("piet", Context);
+        registerPietGlobals(PietModule);
+
+        auto mainFunction = cast<Function>(PietModule.getOrInsertFunction("main",
+                                                                        IntegerType::getInt32Ty(Context),
+                                                                        IntegerType::getInt32Ty(Context),
+                                                                        IntegerType::getInt8Ty(Context)));
+        {
+            Function::arg_iterator args = mainFunction->arg_begin();
+            args[0].setName("argc");
+            args[1].setName("argv");
+        }
+
+        BasicBlock *BB = BasicBlock::Create(Context, "entry", mainFunction);
+        Builder.SetInsertPoint(BB);
 
         Parse::GraphStep *step;
-
         while ((step = graph->walk()) != nullptr) {
             cout << "previous color: " << step->previous->getColor() << "; previous size: " << step->previous->getSize() << endl;
             cout << "next color: " << step->next->getColor() << "; next size: " << step->next->getSize() << endl;
@@ -59,9 +81,19 @@ namespace Piet {
                 assert(transition->getLightnessChange() < operationTable[transition->getHueChange()].size());
                 string operation = operationTable[transition->getHueChange()][transition->getLightnessChange()];
                 assert(operation != "");
-                cout << "Operation: " << operationTable[transition->getHueChange()][transition->getLightnessChange()] << endl;
-            }
 
+                if (operation == OP_PUSH) {
+                    vector<Value *> pushArgs;
+                    pushArgs.push_back(ConstantInt::get(Type::getInt32Ty(Context), APInt(32, step->previous->getSize())));
+                    Builder.CreateCall(push, pushArgs);
+                } else if (operation == OP_OUT_CHAR) {
+                    Builder.CreateCall(outChar);
+                } else if (operation == OP_DUPLICATE) {
+                    Builder.CreateCall(duplicate);
+                } else {
+                    cout << "Yet unsupported operation: " << operationTable[transition->getHueChange()][transition->getLightnessChange()] << endl;
+                }
+            }
 
             // End sequence if terminal node.
             if (step->next->isTerminal()) {
@@ -71,33 +103,11 @@ namespace Piet {
             cout << endl;
         }
 
-        auto mainFunction = cast<Function>(PietModule->getOrInsertFunction("main",
-                                                                        IntegerType::getInt32Ty(Context),
-                                                                        IntegerType::getInt32Ty(Context),
-                                                                        IntegerType::getInt8Ty(Context)));
-        {
-            Function::arg_iterator args = mainFunction->arg_begin();
-            args[0].setName("argc");
-            args[1].setName("argv");
-        }
-
-        BasicBlock *BB = BasicBlock::Create(Context, "entry", mainFunction);
-        Builder.SetInsertPoint(BB);
-
-        auto testFunc = cast<Function>(PietModule->getOrInsertFunction("test",
-                                                                        IntegerType::getInt32Ty(Context),
-                                                                        IntegerType::getInt32Ty(Context),
-                                                                        IntegerType::getInt8Ty(Context)));
-        {
-            Function::arg_iterator args = testFunc->arg_begin();
-            args[0].setName("argc");
-            args[1].setName("argv");
-        }
-
         Builder.CreateRet(ConstantInt::get(Context, APInt(32, 0)));
 
-
-        verifyModule(*(PietModule.get()), &errs());
-        PietModule->print(errs(), nullptr);
+        if (verifyModule(PietModule, &errs())) {
+            exit(1);
+        }
+        PietModule.print(errs(), nullptr);
     }
 }

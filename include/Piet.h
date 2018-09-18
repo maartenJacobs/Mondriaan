@@ -5,9 +5,31 @@
 #include <array>
 #include <vector>
 #include <unordered_map>
+#include <cassert>
 #include <png.h>
 
 using namespace std;
+
+namespace Piet {
+    enum DirectionPoint : uint8_t {
+        TopLeft = 0,
+        TopRight,
+        RightTop,
+        RightBottom,
+        BottomRight,
+        BottomLeft,
+        LeftBottom,
+        LeftTop,
+    };
+}
+
+namespace std {
+  template <> struct hash<Piet::DirectionPoint> {
+    size_t operator()(const Piet::DirectionPoint & x) const {
+        return hash<int>()(x);
+    }
+  };
+}
 
 namespace Piet {
     enum Color {
@@ -47,17 +69,6 @@ namespace Piet {
         DarkMagenta = 0xC000C0,
     };
 
-    enum DirectionPoint : uint8_t {
-        TopLeft = 0,
-        TopRight,
-        RightTop,
-        RightBottom,
-        BottomRight,
-        BottomLeft,
-        LeftBottom,
-        LeftTop,
-    };
-
     const uint8_t MIN_DIRECTION_POINT = TopLeft;
     const uint8_t MAX_DIRECTION_POINT = LeftTop;
 
@@ -85,7 +96,7 @@ namespace Piet {
         class Image {
         public:
             Image(Color ** matrix, uint32_t rows, uint32_t columns) 
-                : matrix(matrix), rows(rows), columns(columns), position{} {
+                : matrix(matrix), rows(rows), columns(columns) {
                     cellOwners = (uint32_t *)malloc(sizeof(uint32_t) * rows * columns);
                     for (uint32_t i = 0; i < rows * columns; i++) {
                         cellOwners[i] = 0;
@@ -109,7 +120,6 @@ namespace Piet {
             uint32_t * cellOwners;
             uint32_t rows;
             uint32_t columns;
-            Position *position;
         };
 
         class Reader {
@@ -223,8 +233,8 @@ namespace Piet {
             OP_ADD = "add",
             OP_SUBTRACT = "subtract",
             OP_MULTIPLY = "multiply",
-            OP_OUT_CHAR = "out(char)"
-            ;
+            OP_DUPLICATE = "duplicate",
+            OP_OUT_CHAR = "out(char)";
 
     class Translator {
     public:
