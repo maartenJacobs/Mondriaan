@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stack>
+#include <iostream>
 
 // Register operations:
 //  PRIMITIVES:
@@ -59,17 +60,28 @@
 
 std::stack<uint32_t> stack;
 
-std::stack<uint32_t> mondriaan_dump_stack() {
+std::stack<uint32_t>& mondriaan_dump_stack() {
     return stack;
 }
 
-void mondriaan_runtime_push(uint32_t value) {
-    stack.push(value);
-}
+extern "C" {
+    void mondriaan_runtime_push(uint32_t value) {
+        stack.push(value);
+    }
 
-// void pop();
-// void roll();
-// void in_char();
-// void in_number();
-// void out_char();
-// void out_number();
+    void mondriaan_runtime_duplicate() {
+        if (stack.empty()) {
+            return;
+        }
+
+        stack.push(stack.top());
+    }
+
+    void mondriaan_runtime_out_char() {
+        if (stack.empty()) {
+            return;
+        }
+
+        std::cout << (char) stack.top();
+    }
+}

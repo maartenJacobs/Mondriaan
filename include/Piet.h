@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <cassert>
 #include <png.h>
+#include <llvm/IR/Module.h>
 
 using namespace std;
 
@@ -238,9 +239,10 @@ namespace Piet {
 
     class Translator {
     public:
-        Translator(Parse::Graph *graph) : graph(graph) {}
+        explicit Translator(Parse::Graph *graph) : graph(graph) {}
         void translateToExecutable(string filename);
     private:
+        void translateIRToExecutable(string objectFilename, llvm::Module &module);
         Parse::Graph *graph;
         const array<array<OpKeyType, 3>, 6> operationTable = {
                 array<OpKeyType, 3>{OP_NOOP, OP_PUSH, OP_POP},
