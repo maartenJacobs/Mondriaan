@@ -71,7 +71,7 @@ namespace Piet::Parse {
 
         auto step = new GraphStep();
         step->previous = currentNode;
-        step->next = edge->getTarget();
+        step->current = edge->getTarget();
 
         currentNode = edge->getTarget();
 

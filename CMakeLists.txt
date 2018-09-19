@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Define executable and sources
-add_executable(test test.cpp
+add_executable(mondriaan main.cpp
         src/Image.cpp
         src/Reader.cpp
         src/PNG.cpp
@@ -22,6 +22,11 @@ add_executable(test test.cpp
         src/Graph.cpp
         src/Translator.cpp
         src/ColorTransition.cpp)
+
+# Define tests
+add_subdirectory(test/unit)
+enable_testing()
+add_test(NAME MondriaanUnitTest COMMAND Test)
 
 # Include PNG
 find_package(PNG MODULE REQUIRED)
@@ -40,7 +45,7 @@ add_definitions(${LLVM_DEFINITIONS})
 link_directories(${llvm_libs})
 
 
-target_link_libraries(test PUBLIC PNG::PNG ${llvm_libs})
+target_link_libraries(mondriaan PUBLIC PNG::PNG ${llvm_libs})
 
 # Configure debug builds (so many segmentation faults)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wpedantic -g -O0")

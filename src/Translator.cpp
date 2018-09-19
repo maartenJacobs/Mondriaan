@@ -115,10 +115,10 @@ namespace Piet {
         Parse::GraphStep *step;
         while ((step = graph->walk()) != nullptr) {
             cout << "previous color: " << step->previous->getColor() << "; previous size: " << step->previous->getSize() << endl;
-            cout << "next color: " << step->next->getColor() << "; next size: " << step->next->getSize() << endl;
+            cout << "current color: " << step->current->getColor() << "; current size: " << step->current->getSize() << endl;
 
             // Determine operation from step.
-            auto transition = ColorTransition::determineTransition(step->previous, step->next);
+            auto transition = ColorTransition::determineTransition(step->previous, step->current);
             if (transition == nullptr) {
                 // No operation.
                 cout << "No operation" << endl;
@@ -142,7 +142,7 @@ namespace Piet {
             }
 
             // End sequence if terminal node.
-            if (step->next->isTerminal()) {
+            if (step->current->isTerminal()) {
                 cout << "Terminate!" << endl;
             }
 

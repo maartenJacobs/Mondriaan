@@ -151,7 +151,7 @@ namespace Piet {
 
         struct GraphStep {
             GraphNode *previous;
-            GraphNode *next;
+            GraphNode *current;
         };
 
         class Graph {
