@@ -47,3 +47,24 @@ BOOST_FIXTURE_TEST_CASE( test_duplicate_empty_stack, TestFixture )
     auto stack = mondriaan_dump_stack();
     BOOST_CHECK( stack.empty() );
 }
+
+BOOST_FIXTURE_TEST_CASE( test_out_char, TestFixture )
+{
+    mondriaan_runtime_push((uint32_t)'a');
+    mondriaan_runtime_out_char();
+
+    // TODO: figure out how to mock I/O.
+
+    auto stack = mondriaan_dump_stack();
+    BOOST_CHECK( stack.empty() );
+}
+
+BOOST_FIXTURE_TEST_CASE( test_out_char_empty_stack, TestFixture )
+{
+    mondriaan_runtime_out_char();
+
+    // TODO: figure out how to mock I/O.
+
+    auto stack = mondriaan_dump_stack();
+    BOOST_CHECK( stack.empty() );
+}

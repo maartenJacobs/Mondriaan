@@ -83,5 +83,6 @@ extern "C" {
         }
 
         std::cout << (char) stack.top();
+        stack.pop();
     }
 }
