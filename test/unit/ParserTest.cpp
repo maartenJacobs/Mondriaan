@@ -86,3 +86,38 @@ BOOST_AUTO_TEST_CASE( test_parse_2_block_image )
         checkGraphNode(step2Block1PixelVertical->current, Blue, 1, false, false);
     }
 }
+
+BOOST_AUTO_TEST_CASE( test_termination )
+{
+    {
+        // Test with a simple image that only terminates.
+        auto matrix = new Color * [6] {
+            new Color[5] { Red,     Red,    Red,    Black,  White },
+            new Color[5] { White,   White,  Red,    Black,  White },
+            new Color[5] { White,   White,  Red,    Black,  White },
+            new Color[5] { White,   Black,  White,  Black,  White },
+            new Color[5] { Black,   Red,    Red,    Red,    Black },
+            new Color[5] { White,   Black,  Black,  Black,  White },
+        };
+        auto image = new Image(matrix, 6, 5);
+        auto parser = new Parser(image);
+        auto graph = parser->parse();
+
+        // Assert that there are 3 steps in the graph:
+        //  1. The initial red block
+        //  2. The white block between the initial and terminal blocks
+        //  3. The terminal red block
+        auto step = graph->walk();
+        checkGraphNode(step->previous, Red, 5, true, false);
+        checkGraphNode(step->current, White, 1, false, false);
+
+        step = graph->walk();
+        checkGraphNode(step->previous, White, 1, false, false);
+        checkGraphNode(step->current, Red, 3, false, true);
+
+        step = graph->walk();
+        BOOST_CHECK( step == nullptr );
+    }
+}
+
+// TODO: Test natural flow from bounds of image
