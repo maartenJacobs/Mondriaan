@@ -19,7 +19,13 @@ namespace Piet::Parse::Read {
         png_read_info(png_ptr, info_ptr);
 
         png_uint_32 width, height;
-        png_get_IHDR(png_ptr, info_ptr, &width, &height, nullptr, nullptr, nullptr, nullptr, nullptr);
+        int depth, colorType; // depth 8, color type 2
+        png_get_IHDR(png_ptr, info_ptr, &width, &height, &depth, &colorType, nullptr, nullptr, nullptr);
+        if (depth != 8 || colorType != 2) {
+            cout << "Expected bit depth 8 and color type 2, but received bit depth " << depth << " and color type " << colorType;
+            cout << endl;
+            exit(1);
+        }
 
         // Read in the entire file.
         png_read_update_info(png_ptr, info_ptr);
@@ -59,7 +65,7 @@ namespace Piet::Parse::Read {
                     && pixelRgb != LightCyan && pixelRgb != Cyan && pixelRgb != DarkCyan
                     && pixelRgb != LightYellow && pixelRgb != Yellow && pixelRgb != DarkYellow)
                 {
-                    cout << "Invalid pixel detected" << endl;
+                    cout << "Invalid pixel detected at (" << row << ", " << column << "). Color value: " << hex << pixelRgb << dec << endl;
                     exit(1);
                 }
 
