@@ -92,3 +92,13 @@ Start from the initial vertex with DP=right and CC=left.
             relevant PHI call (?). Return new function name.
     4. If the operation is not a pointer/switch, add the operation to the
         open sequence collection.
+
+## Credits
+
+Credit for the Piet programming language goes to the creator, David Morgan-Mar. You might want to consider
+supporting him on [Patreon](https://www.patreon.com/dmmaus).
+
+Credit for the samples goes to their respective creators:
+
+- PietHello.png originated from http://www.dangermouse.net/esoteric/piet/samples.html
+- PointerTest.png was created using `npietedit`
