@@ -120,4 +120,53 @@ BOOST_AUTO_TEST_CASE( test_termination )
     }
 }
 
-// TODO: Test natural flow from bounds of image
+BOOST_AUTO_TEST_CASE( test_white_transition )
+{
+    {
+        // Test with a more complex image that includes a white background
+        auto matrix = new Color * [17]{
+                new Color[17]{LightRed,   LightRed,       LightRed,   LightRed,       LightRed,   LightRed,   LightRed,   LightRed,   LightRed,       DarkBlue,       Black,          White,      White,  White,        White, White,       White},
+                new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        White, White,       White},
+                new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        White, White,       White},
+                new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        White, White,       White},
+                new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        White, White,       White},
+                new Color[17]{White,      Black,          White,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        White, White,       White},
+                new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        White, Black,       White},
+                new Color[17]{Black,      DarkMagenta,    Black,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        Black, DarkMagenta, Black},
+                new Color[17]{Black,      DarkMagenta,    White,      DarkMagenta,    Red,        LightRed,   LightRed,   LightRed,   White,          LightYellow,    White,          LightRed,   Red,    DarkMagenta,  White, DarkMagenta, Black},
+                new Color[17]{Black,      DarkMagenta,    Black,      White,          White,      White,      White,      White,      White,          White,          White,          White,      White,  White,        Black, DarkMagenta, Black},
+                new Color[17]{White,      Black,          White,      White,          White,      White,      White,      White,      White,          LightRed,       White,          White,      White,  White,        White, Black,       White},
+                new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      White,          LightRed,       White,          White,      White,  White,        White, White,       White},
+                new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      White,          Red,            White,          White,      White,  White,        White, White,       White},
+                new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      White,          DarkMagenta,    White,          White,      White,  White,        White, White,       White},
+                new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      Black,          White,          Black,          White,      White,  White,        White, White,       White},
+                new Color[17]{White,      White,          White,      White,          White,      White,      White,      Black,      DarkMagenta,    DarkMagenta,    DarkMagenta,    Black,      White,  White,        White, White,       White},
+                new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      Black,          Black,          Black,          White,      White,  White,        White, White,       White},
+        };
+        auto image = new Image(matrix, 17, 17);
+        auto parser = new Parser(image);
+        auto graph = parser->parse();
+        GraphStep *step;
+
+        // Store the initial node and direction point for later.
+        GraphNode *initialNode = graph->getInitialNode();
+        DirectionPoint initialDP = graph->getCurrentDirection();
+
+        // Assert the path after the switch without changing the direction.
+        // 1. Initial light red to dark blue
+        step = graph->walk();
+        checkGraphNode(step->previous, LightRed, 9, true, false);
+        checkGraphNode(step->current, DarkBlue, 8, false, false);
+        BOOST_CHECK( ! step->skipTransition );
+        // 2. Dark blue to light yellow (SWITCH)
+        step = graph->walk();
+        checkGraphNode(step->previous, DarkBlue, 8, false, false);
+        checkGraphNode(step->current, LightYellow, 1, false, false);
+        BOOST_CHECK( ! step->skipTransition );
+        // 3. Light yellow to middle exit point
+        step = graph->walk();
+        checkGraphNode(step->previous, LightYellow, 1, false, false);
+        checkGraphNode(step->current, LightRed, 2, false, false);
+        BOOST_CHECK( ! step->skipTransition );
+    }
+}

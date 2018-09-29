@@ -220,12 +220,34 @@ namespace Piet::Parse {
         }
     }
 
+    void incrementIdentifierParts(vector<char> &identifierParts) {
+        char last = identifierParts.back();
+        if (last == 'Z') {
+            identifierParts.push_back('A');
+            return;
+        }
+
+        identifierParts.pop_back();
+        identifierParts.push_back((char)(last + 1));
+    }
+
+    string identifierFromParts(vector<char> identifierParts) {
+        string id;
+        while (!identifierParts.empty()) {
+            id += identifierParts.front();
+            identifierParts.pop_back();
+        }
+
+        return id;
+    }
+
     Graph *Parser::parse() {
         stack<Position *> visitPositions;
         visitPositions.push(new Position{0, 0});
         uint32_t cellOwner = 0;
         vector<CodelBlock *> blocks;
         vector<GraphNode *> nodes;
+        vector<char> identifierParts = {'A'};
 
         while (!visitPositions.empty()) {
             auto position = visitPositions.top();
@@ -244,7 +266,8 @@ namespace Piet::Parse {
 
             cellOwner++;
             CodelBlock *block = visitBlock(cellOwner, image, position);
-            block->constructingNode = new GraphNode(block->color, block->size);
+            block->constructingNode = new GraphNode(block->color, block->size, identifierFromParts(identifierParts));
+            incrementIdentifierParts(identifierParts);
             blocks.push_back(block);
             assert(blocks.at(cellOwner - 1) == block);
 

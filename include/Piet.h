@@ -8,20 +8,24 @@
 #include <cassert>
 #include <png.h>
 #include <llvm/IR/Module.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Function.h>
 
 using namespace std;
 
 namespace Piet {
     enum DirectionPoint : uint8_t {
-        TopLeft = 0,
-        TopRight,
-        RightTop,
-        RightBottom,
-        BottomRight,
-        BottomLeft,
-        LeftBottom,
-        LeftTop,
+        TopLeft = 0, // DP = top ; CC = left
+        TopRight, // DP = top ; CC = right
+        RightTop, // DP = right ; CC = left
+        RightBottom, // DP = right ; CC = right
+        BottomRight, // DP = down ; CC = left
+        BottomLeft, // DP = down ; CC = right
+        LeftBottom, // DP = left ; CC = left
+        LeftTop, // DP = left ; CC = right
     };
+
+    DirectionPoint incrementDirectionPointer(DirectionPoint direction);
 }
 
 namespace std {
@@ -152,6 +156,7 @@ namespace Piet {
         struct GraphStep {
             GraphNode *previous;
             GraphNode *current;
+            bool skipTransition = false;
         };
 
         class Graph {
@@ -160,6 +165,9 @@ namespace Piet {
                 : nodes(nodes), initialNode(initialNode) {}
             GraphStep *walk();
             void restartWalk(GraphNode *fromNode, DirectionPoint inDirection);
+            DirectionPoint getCurrentDirection();
+            GraphNode *getInitialNode();
+            GraphNode *getCurrentNode();
         private:
             vector<GraphNode *> nodes;
             GraphNode *initialNode = nullptr;
@@ -189,7 +197,8 @@ namespace Piet {
 
         class GraphNode {
         public:
-            GraphNode(Color color, uint32_t size) : color(color), size(size) {}
+            GraphNode(Color color, uint32_t size, string identifier)
+                : color(color), size(size), identifier(identifier) {}
             void markAsInitial();
             void markAsTerminal();
             bool isTerminal();
@@ -198,9 +207,11 @@ namespace Piet {
             GraphEdge *edgeForDirection(DirectionPoint direction);
             Color getColor();
             uint32_t getSize();
+            string getIdentifier();
         private:
             Color color;
             uint32_t size;
+            string identifier;
             unordered_map<DirectionPoint, GraphEdge *> edges;
             bool terminal = false;
             bool initial = false;
@@ -235,21 +246,32 @@ namespace Piet {
             OP_SUBTRACT = "subtract",
             OP_MULTIPLY = "multiply",
             OP_DUPLICATE = "duplicate",
-            OP_OUT_CHAR = "out(char)";
+            OP_OUT_CHAR = "out(char)",
+            OP_POINTER = "pointer",
+            OP_SWITCH = "switch",
+            OP_IN_NUMBER = "in(number)";
 
     class Translator {
     public:
-        explicit Translator(Parse::Graph *graph) : graph(graph) {}
+        explicit Translator(Parse::Graph *graph)
+            : builder(context), module(llvm::Module("piet", context)), graph(graph) {}
         void translateToExecutable(string filename);
     private:
         void translateIRToExecutable(string objectFilename, llvm::Module &module);
+        llvm::Function *translateBranch(Parse::GraphNode *node, DirectionPoint dp);
+        void registerPietGlobals();
+
+        llvm::LLVMContext context;
+        llvm::IRBuilder<> builder;
+        llvm::Module module;
         Parse::Graph *graph;
+        unordered_map<string, llvm::Function *> translatedBranches;
         const array<array<OpKeyType, 3>, 6> operationTable = {
                 array<OpKeyType, 3>{OP_NOOP, OP_PUSH, OP_POP},
                 {OP_ADD, OP_SUBTRACT, OP_MULTIPLY},
                 {"divide", "mod", "not"},
-                {"greater", "pointer", "switch"},
-                {"duplicate", "roll", "in(number)"},
+                {"greater", OP_POINTER, OP_SWITCH},
+                {"duplicate", "roll", OP_IN_NUMBER},
                 {"in(char)", "out(number)", OP_OUT_CHAR}
         };
     };

@@ -85,4 +85,26 @@ extern "C" {
         std::cout << (char) stack.top();
         stack.pop();
     }
+
+    uint8_t mondriaan_runtime_pointer() {
+        if (stack.empty()) {
+            return 0;
+        }
+
+        auto top = stack.top();
+        stack.pop();
+
+        return (uint8_t)(top % 4);
+    }
+
+    void mondriaan_runtime_in_number() {
+        std::string line;
+        std::getline(std::cin, line);
+        try {
+            stack.push((uint32_t)std::stoul(line));
+        } catch (...) {
+            // Ignore
+            return;
+        }
+    }
 }

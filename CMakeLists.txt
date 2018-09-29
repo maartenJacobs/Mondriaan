@@ -21,7 +21,8 @@ add_executable(mondriaan main.cpp
         src/Parser.cpp
         src/Graph.cpp
         src/Translator.cpp
-        src/ColorTransition.cpp)
+        src/ColorTransition.cpp
+        src/DirectionPoint.cpp)
 
 # Define tests
 add_subdirectory(test/unit)

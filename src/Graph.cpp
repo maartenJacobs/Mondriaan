@@ -13,6 +13,10 @@ namespace Piet::Parse {
         terminal = true;
     }
 
+    string GraphNode::getIdentifier() {
+        return identifier;
+    }
+
     GraphEdge *GraphNode::edgeForDirection(Piet::DirectionPoint direction) {
         auto edgeIterator = edges.find(direction);
         if (edgeIterator == edges.end()) {
@@ -40,6 +44,18 @@ namespace Piet::Parse {
 
     bool GraphNode::isInitial() {
         return initial;
+    }
+
+    DirectionPoint Graph::getCurrentDirection() {
+        return currentDirection;
+    }
+
+    GraphNode *Graph::getInitialNode() {
+        return initialNode;
+    }
+
+    GraphNode *Graph::getCurrentNode() {
+        return currentNode;
     }
 
     void Graph::restartWalk(GraphNode *fromNode, DirectionPoint inDirection) {
