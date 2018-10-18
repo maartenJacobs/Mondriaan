@@ -103,16 +103,8 @@ BOOST_AUTO_TEST_CASE( test_termination )
         auto parser = new Parser(image);
         auto graph = parser->parse();
 
-        // Assert that there are 3 steps in the graph:
-        //  1. The initial red block
-        //  2. The white block between the initial and terminal blocks
-        //  3. The terminal red block
         auto step = graph->walk();
         checkGraphNode(step->previous, Red, 5, true, false);
-        checkGraphNode(step->current, White, 1, false, false);
-
-        step = graph->walk();
-        checkGraphNode(step->previous, White, 1, false, false);
         checkGraphNode(step->current, Red, 3, false, true);
 
         step = graph->walk();
@@ -130,8 +122,8 @@ BOOST_AUTO_TEST_CASE( test_white_transition )
                 new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        White, White,       White},
                 new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        White, White,       White},
                 new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        White, White,       White},
-                new Color[17]{White,      Black,          White,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        White, White,       White},
-                new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        White, Black,       White},
+                new Color[17]{White,      White,          White,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        White, White,       White},
+                new Color[17]{White,      Black,          White,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        White, Black,       White},
                 new Color[17]{Black,      DarkMagenta,    Black,      White,          White,      White,      White,      White,      White,          DarkBlue,       Black,          White,      White,  White,        Black, DarkMagenta, Black},
                 new Color[17]{Black,      DarkMagenta,    White,      DarkMagenta,    Red,        LightRed,   LightRed,   LightRed,   White,          LightYellow,    White,          LightRed,   Red,    DarkMagenta,  White, DarkMagenta, Black},
                 new Color[17]{Black,      DarkMagenta,    Black,      White,          White,      White,      White,      White,      White,          White,          White,          White,      White,  White,        Black, DarkMagenta, Black},
@@ -148,10 +140,6 @@ BOOST_AUTO_TEST_CASE( test_white_transition )
         auto graph = parser->parse();
         GraphStep *step;
 
-        // Store the initial node and direction point for later.
-        GraphNode *initialNode = graph->getInitialNode();
-        DirectionPoint initialDP = graph->getCurrentDirection();
-
         // Assert the path after the switch without changing the direction.
         // 1. Initial light red to dark blue
         step = graph->walk();
@@ -167,6 +155,23 @@ BOOST_AUTO_TEST_CASE( test_white_transition )
         step = graph->walk();
         checkGraphNode(step->previous, LightYellow, 1, false, false);
         checkGraphNode(step->current, LightRed, 2, false, false);
+        BOOST_CHECK( step->skipTransition );
+        // 4. Light red to red step.
+        step = graph->walk();
+        checkGraphNode(step->previous, LightRed, 2, false, false);
+        checkGraphNode(step->current, Red, 1, false, false);
         BOOST_CHECK( ! step->skipTransition );
+        // 5. Red to last dark magenta before terminal step.
+        step = graph->walk();
+        checkGraphNode(step->previous, Red, 1, false, false);
+        checkGraphNode(step->current, DarkMagenta, 1, false, false);
+        BOOST_CHECK( ! step->skipTransition );
+        // 6. Dark magenta to terminal dark magenta block.
+        step = graph->walk();
+        checkGraphNode(step->previous, DarkMagenta, 1, false, false);
+        checkGraphNode(step->current, DarkMagenta, 3, false, true);
+        BOOST_CHECK( step->skipTransition );
     }
 }
+
+// Add test for single codel in top-left corner with white codel to right and bottom.

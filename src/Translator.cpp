@@ -26,6 +26,7 @@ namespace Piet {
     Function *push;
     Function *duplicate;
     Function *outChar;
+    Function *outNumber;
     Function *pointerBranch;
     Function *inNumber;
 
@@ -38,6 +39,10 @@ namespace Piet {
         // Register out(char).
         FunctionType *outCharType = FunctionType::get(Type::getVoidTy(context), vector<Type *>(), false);
         outChar = Function::Create(outCharType, Function::ExternalLinkage, "mondriaan_runtime_out_char", &module);
+
+        // Register out(number).
+        FunctionType *outNumberType = FunctionType::get(Type::getVoidTy(context), vector<Type *>(), false);
+        outNumber = Function::Create(outNumberType, Function::ExternalLinkage, "mondriaan_runtime_out_number", &module);
 
         // Register duplicate.
         FunctionType *duplicateType = FunctionType::get(Type::getVoidTy(context), vector<Type *>(), false);
@@ -52,7 +57,7 @@ namespace Piet {
         inNumber = Function::Create(inNumberType, Function::ExternalLinkage, "mondriaan_runtime_in_number", &module);
     }
 
-    void Translator::translateIRToExecutable(string objectFilename, Module &module) {
+    void Translator::translateIRToExecutable(string objectFilename) {
         // Initialize the target registry etc.
         InitializeAllTargetInfos();
         InitializeAllTargets();
@@ -132,7 +137,7 @@ namespace Piet {
             cout << "current color: " << hex << step->current->getColor() << dec << "; current size: " << step->current->getSize() << endl;
 
             // Determine operation from step.
-            auto transition = ColorTransition::determineTransition(step->previous, step->current);
+            auto transition = ! step->skipTransition ? ColorTransition::determineTransition(step->previous, step->current) : nullptr;
             if (transition == nullptr) {
                 // No operation.
                 cout << "No operation" << endl;
@@ -148,6 +153,8 @@ namespace Piet {
                     builder.CreateCall(push, pushArgs);
                 } else if (operation == OP_OUT_CHAR) {
                     builder.CreateCall(outChar);
+                } else if (operation == OP_OUT_NUMBER) {
+                    builder.CreateCall(outNumber);
                 } else if (operation == OP_DUPLICATE) {
                     builder.CreateCall(duplicate);
                 } else if (operation == OP_IN_NUMBER) {
@@ -250,7 +257,7 @@ namespace Piet {
             // End sequence if terminal node.
             if (step->current->isTerminal()) {
                 if (translatedBranches[sequenceID]) {
-                    openFunction->removeFromParent();
+                    openFunction->eraseFromParent();
                     return translatedBranches[sequenceID];
                 }
 
@@ -291,6 +298,7 @@ namespace Piet {
             if (verifyFunction(*mainFunction, &errs())) {
                 exit(1);
             }
+            module.print(errs(), nullptr);
         }
 
         if (verifyModule(module, &errs())) {
@@ -298,6 +306,6 @@ namespace Piet {
         }
         module.print(errs(), nullptr);
 
-        translateIRToExecutable(filename + ".o", module);
+        translateIRToExecutable(filename + ".o");
     }
 }

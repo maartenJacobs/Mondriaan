@@ -86,6 +86,15 @@ extern "C" {
         stack.pop();
     }
 
+    void mondriaan_runtime_out_number() {
+        if (stack.empty()) {
+            return;
+        }
+
+        std::cout << stack.top();
+        stack.pop();
+    }
+
     uint8_t mondriaan_runtime_pointer() {
         if (stack.empty()) {
             return 0;

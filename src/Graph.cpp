@@ -38,6 +38,10 @@ namespace Piet::Parse {
         return target;
     }
 
+    bool GraphEdge::isNoop() {
+        return noop;
+    }
+
     bool GraphNode::isTerminal() {
         return terminal;
     }
@@ -88,8 +92,9 @@ namespace Piet::Parse {
         auto step = new GraphStep();
         step->previous = currentNode;
         step->current = edge->getTarget();
+        step->skipTransition = edge->isNoop();
 
-        currentNode = edge->getTarget();
+        currentNode = step->current;
 
         return step;
     }

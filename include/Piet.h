@@ -1,6 +1,7 @@
 #ifndef PIET_H
 #define PIET_H
 
+#include <cstdio>
 #include <string>
 #include <array>
 #include <vector>
@@ -145,9 +146,12 @@ namespace Piet {
         class GraphNode;
         class GraphEdge;
 
+        /**
+         * @brief Piet::Parser parses a loaded image into a graph representing the flow of the Piet program.
+         */
         class Parser {
         public:
-            Parser(Image *image) : image(image) {}
+            explicit Parser(Image *image) : image(image) {}
             Piet::Parse::Graph *parse();
         private:
             Image *image;
@@ -177,12 +181,12 @@ namespace Piet {
 
         class GraphEdge {
         public:
-            GraphEdge(DirectionPoint *newDirection)
+            explicit GraphEdge(DirectionPoint *newDirection)
                 : newDirection(newDirection), target(nullptr) {
                 assert(*newDirection >= MIN_DIRECTION_POINT && *newDirection <= MAX_DIRECTION_POINT);
             }
-            GraphEdge(DirectionPoint *newDirection, GraphNode *target)
-                : newDirection(newDirection), target(target) {
+            GraphEdge(DirectionPoint *newDirection, GraphNode *target, bool noop)
+                : newDirection(newDirection), target(target), noop(noop) {
                 assert(*newDirection >= MIN_DIRECTION_POINT && *newDirection <= MAX_DIRECTION_POINT);
             }
 
@@ -190,9 +194,11 @@ namespace Piet {
 
             DirectionPoint *getNewDirection();
             GraphNode *getTarget();
+            bool isNoop();
         private:
             DirectionPoint *newDirection;
             GraphNode *target;
+            bool noop = false;
         };
 
         class GraphNode {
@@ -247,6 +253,7 @@ namespace Piet {
             OP_MULTIPLY = "multiply",
             OP_DUPLICATE = "duplicate",
             OP_OUT_CHAR = "out(char)",
+            OP_OUT_NUMBER = "out(number)",
             OP_POINTER = "pointer",
             OP_SWITCH = "switch",
             OP_IN_NUMBER = "in(number)";
@@ -257,7 +264,7 @@ namespace Piet {
             : builder(context), module(llvm::Module("piet", context)), graph(graph) {}
         void translateToExecutable(string filename);
     private:
-        void translateIRToExecutable(string objectFilename, llvm::Module &module);
+        void translateIRToExecutable(string objectFilename);
         llvm::Function *translateBranch(Parse::GraphNode *node, DirectionPoint dp);
         void registerPietGlobals();
 
@@ -272,7 +279,7 @@ namespace Piet {
                 {"divide", "mod", "not"},
                 {"greater", OP_POINTER, OP_SWITCH},
                 {"duplicate", "roll", OP_IN_NUMBER},
-                {"in(char)", "out(number)", OP_OUT_CHAR}
+                {"in(char)", OP_OUT_NUMBER, OP_OUT_CHAR}
         };
     };
 }
