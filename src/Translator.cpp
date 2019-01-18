@@ -147,11 +147,6 @@ Function *Translator::translateBranch(Parse::GraphNode *node,
       sequenceID += "_" + step->previous->getIdentifier();
     }
 
-    cout << "previous color: " << hex << step->previous->getColor() << dec
-         << "; previous size: " << step->previous->getSize() << endl;
-    cout << "current color: " << hex << step->current->getColor() << dec
-         << "; current size: " << step->current->getSize() << endl;
-
     // Determine operation from step.
     auto transition = !step->skipTransition
                           ? ColorTransition::determineTransition(step->previous,
@@ -159,7 +154,6 @@ Function *Translator::translateBranch(Parse::GraphNode *node,
                           : nullptr;
     if (transition == nullptr) {
       // No operation.
-      cout << "No operation" << endl;
     } else {
       assert(transition->getHueChange() < operationTable.size());
       assert(transition->getLightnessChange() <
@@ -306,8 +300,6 @@ Function *Translator::translateBranch(Parse::GraphNode *node,
       builder.CreateRetVoid();
       openFunction->setName(sequenceID);
     }
-
-    cout << endl;
   }
 
   if (verifyFunction(*openFunction, &errs())) {
