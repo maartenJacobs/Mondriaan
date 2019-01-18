@@ -262,7 +262,13 @@ namespace Piet {
     public:
         explicit Translator(Parse::Graph *graph)
             : builder(context), module(llvm::Module("piet", context)), graph(graph) {}
-        void translateToExecutable(string filename);
+
+        /*!
+         * @brief Translate the graph to an executable file or LLVM IR code.
+         * @param filename The output filename.
+         * @param onlyIR Limit output to LLVM IR code.
+         */
+        void translateToExecutable(string filename, bool onlyIR);
     private:
         void translateIRToExecutable(string objectFilename);
         llvm::Function *translateBranch(Parse::GraphNode *node, DirectionPoint dp);

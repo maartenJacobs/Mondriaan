@@ -277,7 +277,7 @@ namespace Piet {
         return openFunction;
     }
 
-    void Translator::translateToExecutable(string filename) {
+    void Translator::translateToExecutable(string filename, bool onlyIR) {
         registerPietGlobals();
         Function *firstBranch = translateBranch(graph->getInitialNode(), graph->getCurrentDirection());
 
@@ -296,16 +296,24 @@ namespace Piet {
             builder.CreateRet(ConstantInt::get(context, APInt(32, 0)));
 
             if (verifyFunction(*mainFunction, &errs())) {
+                // TODO: throw parse exception to indicate Mondriaan bug.
                 exit(1);
             }
-            module.print(errs(), nullptr);
         }
 
         if (verifyModule(module, &errs())) {
+            // TODO: throw parse exception to indicate Mondriaan bug.
             exit(1);
         }
-        module.print(errs(), nullptr);
 
-        translateIRToExecutable(filename + ".o");
+        // Optimise, please?
+
+        if (onlyIR) {
+            std::error_code writeError;
+            auto outputStream = raw_fd_ostream(filename, writeError, sys::fs::F_None);
+            module.print(outputStream, nullptr);
+        } else {
+            translateIRToExecutable(filename + ".o");
+        }
     }
 }
