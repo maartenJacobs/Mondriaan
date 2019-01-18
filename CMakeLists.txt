@@ -50,3 +50,6 @@ target_link_libraries(mondriaan PUBLIC PNG::PNG ${llvm_libs})
 
 # Configure debug builds (so many segmentation faults)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wpedantic -g -O0")
+
+# Include third-party tools.
+include(clang-format.cmake)
