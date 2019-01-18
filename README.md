@@ -5,7 +5,14 @@ Mondriaan is an LLVM-based compiler for the Piet programming language. It is cur
 ## Usage
 
 ```
-Usage: Mondriaan [--emit-llvm] [-S] -o output_file source_file
+The unfancy Piet compiler
+Usage:
+  Mondriaan [OPTION...] input-file
+
+  -h, --help             Display available options.
+  -S, --emit-llvm        Emit optimised LLVM IR code only. Do not compile IR
+                         code.
+  -o, --output-file arg  Specify output file.
 ```
 
 ## Architecture
