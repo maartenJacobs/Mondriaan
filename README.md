@@ -15,6 +15,37 @@ Usage:
   -o, --output-file arg  Specify output file.
 ```
 
+## Building
+
+### macOS
+
+```
+# Install LLVM 6
+brew install cmake llvm@6
+brew outdated llvm@6 || brew upgrade llvm@6
+
+# Build runtime library
+cd lib
+mkdir -p build
+cd build
+cmake ..
+make
+
+# Build mondriaan
+cd ../..
+mkdir -p build
+cd build
+cmake .. -DLLVM_DIR=/usr/local/Cellar/llvm/6.0.1/lib/cmake/llvm
+make
+
+# Run mondriaan with an example program
+./mondriaan --output-file PointerTest ../examples/PointerTest.png
+LIBRARY_PATH=../lib/build/src/ clang++ PointerTest.o -lMondriaanRuntime -o PointerTest
+```
+
+For IDEs:
+* In Clion, add `-DLLVM_DIR=/usr/local/Cellar/llvm/6.0.1/lib/cmake/llvm` to Preferences > Build, Execution, Deployment > CMake > CMake options.
+
 ## Architecture
 
 In a nutshell: Source file => \[ Parser ] => PietGraph => \[ Translator ] => LLVM IR => \[ LLVM ]
@@ -105,7 +136,7 @@ Start from the initial vertex with DP=right and CC=left.
 Credit for the Piet programming language goes to the creator, David Morgan-Mar. You might want to consider
 supporting him on [Patreon](https://www.patreon.com/dmmaus).
 
-Credit for the samples goes to their respective creators:
+Credit for the examples go to their respective creators:
 
 - PietHello.png originated from http://www.dangermouse.net/esoteric/piet/samples.html
 - PointerTest.png was created using `npietedit`

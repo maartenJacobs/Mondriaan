@@ -108,6 +108,7 @@ void Translator::translateIRToExecutable(string objectFilename) {
     exit(1);
   }
 
+  // TODO: maybe not use something with legacy in the name.
   legacy::PassManager pass;
 
   if (targetMachine->addPassesToEmitFile(pass, dest,
@@ -118,10 +119,6 @@ void Translator::translateIRToExecutable(string objectFilename) {
 
   pass.run(module);
   dest.flush();
-
-  // Link object file with runtime library and set entry point:
-  // LIBRARY_PATH=<runtimelibdir> clang++ <objectfile> -lMondriaanRuntime -o
-  // <execfile>
 }
 
 Function *Translator::translateBranch(Parse::GraphNode *node,
@@ -348,6 +345,7 @@ void Translator::translateToExecutable(string filename, bool onlyIR) {
     module.print(outputStream, nullptr);
   } else {
     translateIRToExecutable(filename + ".o");
+    std::cout << "Created " << filename + ".o" << std::endl;
   }
 }
 } // namespace Piet
