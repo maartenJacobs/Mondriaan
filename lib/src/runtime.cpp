@@ -1,6 +1,6 @@
-#include <stdint.h>
-#include <stack>
 #include <iostream>
+#include <stack>
+#include <stdint.h>
 
 // Register operations:
 //  PRIMITIVES:
@@ -12,8 +12,8 @@
 //  pop
 //      pop should check if the next stack index is greater than 0; if it's not,
 //      skip the pop command.
-//      Otherwise, decrement the next stack index by 1 and return the value at the
-//      new index.
+//      Otherwise, decrement the next stack index by 1 and return the value at
+//      the new index.
 //
 //  COMPOUNDS:
 //  add
@@ -45,14 +45,15 @@
 //  CONTROL FLOW:
 //  pointer
 //      Validation: next stack index > 0
-//      Pop the top value. If the value is 0 mod 4, then take the branch matching
-//      the current direction. If the value is 1 mod 4, then take the branch matching
-//      the next direction with a matching CC but the next DP. And so forth.
+//      Pop the top value. If the value is 0 mod 4, then take the branch
+//      matching the current direction. If the value is 1 mod 4, then take the
+//      branch matching the next direction with a matching CC but the next DP.
+//      And so forth.
 //  switch
 //      Validation: next stack index > 0
-//      Pop the top value. If the value is 0 mod 2, then take the branch matching
-//      the current direction. If the value is 1 mod 2, then take the branch matching
-//      the next direction with matching DP but the next CC.
+//      Pop the top value. If the value is 0 mod 2, then take the branch
+//      matching the current direction. If the value is 1 mod 2, then take the
+//      branch matching the next direction with matching DP but the next CC.
 //
 //  INPUT:
 //  in (char), in (number)
@@ -60,60 +61,56 @@
 
 std::stack<uint32_t> stack;
 
-std::stack<uint32_t>& mondriaan_dump_stack() {
-    return stack;
-}
+std::stack<uint32_t> &mondriaan_dump_stack() { return stack; }
 
 extern "C" {
-    void mondriaan_runtime_push(uint32_t value) {
-        stack.push(value);
-    }
+void mondriaan_runtime_push(uint32_t value) { stack.push(value); }
 
-    void mondriaan_runtime_duplicate() {
-        if (stack.empty()) {
-            return;
-        }
+void mondriaan_runtime_duplicate() {
+  if (stack.empty()) {
+    return;
+  }
 
-        stack.push(stack.top());
-    }
+  stack.push(stack.top());
+}
 
-    void mondriaan_runtime_out_char() {
-        if (stack.empty()) {
-            return;
-        }
+void mondriaan_runtime_out_char() {
+  if (stack.empty()) {
+    return;
+  }
 
-        std::cout << (char) stack.top();
-        stack.pop();
-    }
+  std::cout << (char)stack.top();
+  stack.pop();
+}
 
-    void mondriaan_runtime_out_number() {
-        if (stack.empty()) {
-            return;
-        }
+void mondriaan_runtime_out_number() {
+  if (stack.empty()) {
+    return;
+  }
 
-        std::cout << stack.top();
-        stack.pop();
-    }
+  std::cout << stack.top();
+  stack.pop();
+}
 
-    uint8_t mondriaan_runtime_pointer() {
-        if (stack.empty()) {
-            return 0;
-        }
+uint8_t mondriaan_runtime_pointer() {
+  if (stack.empty()) {
+    return 0;
+  }
 
-        auto top = stack.top();
-        stack.pop();
+  auto top = stack.top();
+  stack.pop();
 
-        return (uint8_t)(top % 4);
-    }
+  return (uint8_t)(top % 4);
+}
 
-    void mondriaan_runtime_in_number() {
-        std::string line;
-        std::getline(std::cin, line);
-        try {
-            stack.push((uint32_t)std::stoul(line));
-        } catch (...) {
-            // Ignore
-            return;
-        }
-    }
+void mondriaan_runtime_in_number() {
+  std::string line;
+  std::getline(std::cin, line);
+  try {
+    stack.push((uint32_t)std::stoul(line));
+  } catch (...) {
+    // Ignore
+    return;
+  }
+}
 }

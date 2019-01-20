@@ -17,3 +17,6 @@ add_subdirectory(src)
 add_subdirectory(test)
 enable_testing()
 add_test(NAME MondriaanRuntimeTest COMMAND Test)
+
+# Include third-party tools.
+include(clang-format.cmake)
