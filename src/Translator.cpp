@@ -30,40 +30,38 @@ Function *pointerBranch;
 Function *inNumber;
 
 void Translator::registerPietGlobals() {
+  Type *voidTy = Type::getVoidTy(context);
+  Type *int32Ty = Type::getInt32Ty(context);
+  vector<Type *> noArgs{};
+
   // Register push.
-  std::vector<Type *> pushArgs(1, Type::getInt32Ty(context));
   FunctionType *pushType =
-      FunctionType::get(Type::getVoidTy(context), pushArgs, false);
+      FunctionType::get(voidTy, std::vector<Type *>(1, int32Ty), false);
   push = Function::Create(pushType, Function::ExternalLinkage,
                           "mondriaan_runtime_push", &module);
 
   // Register out(char).
-  FunctionType *outCharType =
-      FunctionType::get(Type::getVoidTy(context), vector<Type *>(), false);
+  FunctionType *outCharType = FunctionType::get(voidTy, noArgs, false);
   outChar = Function::Create(outCharType, Function::ExternalLinkage,
                              "mondriaan_runtime_out_char", &module);
 
   // Register out(number).
-  FunctionType *outNumberType =
-      FunctionType::get(Type::getVoidTy(context), vector<Type *>(), false);
+  FunctionType *outNumberType = FunctionType::get(voidTy, noArgs, false);
   outNumber = Function::Create(outNumberType, Function::ExternalLinkage,
                                "mondriaan_runtime_out_number", &module);
 
   // Register duplicate.
-  FunctionType *duplicateType =
-      FunctionType::get(Type::getVoidTy(context), vector<Type *>(), false);
+  FunctionType *duplicateType = FunctionType::get(voidTy, noArgs, false);
   duplicate = Function::Create(duplicateType, Function::ExternalLinkage,
                                "mondriaan_runtime_duplicate", &module);
 
   // Register pointer.
-  FunctionType *pointerType =
-      FunctionType::get(Type::getInt32Ty(context), vector<Type *>(), false);
+  FunctionType *pointerType = FunctionType::get(int32Ty, noArgs, false);
   pointerBranch = Function::Create(pointerType, Function::ExternalLinkage,
                                    "mondriaan_runtime_pointer", &module);
 
   // Register in(number);
-  FunctionType *inNumberType =
-      FunctionType::get(Type::getVoidTy(context), vector<Type *>(), false);
+  FunctionType *inNumberType = FunctionType::get(voidTy, noArgs, false);
   inNumber = Function::Create(inNumberType, Function::ExternalLinkage,
                               "mondriaan_runtime_in_number", &module);
 }
