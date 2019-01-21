@@ -1,4 +1,7 @@
-file(GLOB_RECURSE CLANG_FORMAT_SRC src/*.cpp include/Runtime.h)
+file(GLOB_RECURSE CLANG_FORMAT_SRC
+        src/*.cpp
+        include/Runtime.h
+        test/*.cpp)
 
 add_custom_target(
         clangformat

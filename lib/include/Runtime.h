@@ -10,4 +10,7 @@ void mondriaan_runtime_out_char();
 void mondriaan_runtime_out_number();
 uint8_t mondriaan_runtime_pointer();
 void mondriaan_runtime_in_number();
+void mondriaan_runtime_multiply();
+void mondriaan_runtime_divide();
+void mondriaan_runtime_roll();
 }

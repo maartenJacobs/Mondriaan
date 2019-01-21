@@ -28,6 +28,9 @@ Function *outChar;
 Function *outNumber;
 Function *pointerBranch;
 Function *inNumber;
+Function *multiply;
+Function *divide;
+Function *roll;
 
 void Translator::registerPietGlobals() {
   Type *voidTy = Type::getVoidTy(context);
@@ -64,6 +67,21 @@ void Translator::registerPietGlobals() {
   FunctionType *inNumberType = FunctionType::get(voidTy, noArgs, false);
   inNumber = Function::Create(inNumberType, Function::ExternalLinkage,
                               "mondriaan_runtime_in_number", &module);
+
+  // Register multiply.
+  FunctionType *multiplyType = FunctionType::get(voidTy, noArgs, false);
+  multiply = Function::Create(multiplyType, Function::ExternalLinkage,
+                              "mondriaan_runtime_multiply", &module);
+
+  // Register divide.
+  FunctionType *divideType = FunctionType::get(voidTy, noArgs, false);
+  divide = Function::Create(divideType, Function::ExternalLinkage,
+                            "mondriaan_runtime_divide", &module);
+
+  // Register roll.
+  FunctionType *rollType = FunctionType::get(voidTy, noArgs, false);
+  roll = Function::Create(rollType, Function::ExternalLinkage,
+                          "mondriaan_runtime_roll", &module);
 }
 
 void Translator::translateIRToExecutable(string objectFilename) {
@@ -170,6 +188,12 @@ Function *Translator::translateBranch(Parse::GraphNode *node,
         builder.CreateCall(duplicate);
       } else if (operation == OP_IN_NUMBER) {
         builder.CreateCall(inNumber);
+      } else if (operation == OP_MULTIPLY) {
+        builder.CreateCall(multiply);
+      } else if (operation == OP_DIVIDE) {
+        builder.CreateCall(divide);
+      } else if (operation == OP_ROLL) {
+        builder.CreateCall(roll);
       } else if (operation == OP_POINTER) {
         if (translatedBranches[sequenceID]) {
           openFunction->removeFromParent();

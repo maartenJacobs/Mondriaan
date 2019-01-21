@@ -260,7 +260,8 @@ const string OP_NOOP = "noop", OP_PUSH = "push", OP_POP = "pop", OP_ADD = "add",
              OP_SUBTRACT = "subtract", OP_MULTIPLY = "multiply",
              OP_DUPLICATE = "duplicate", OP_OUT_CHAR = "out(char)",
              OP_OUT_NUMBER = "out(number)", OP_POINTER = "pointer",
-             OP_SWITCH = "switch", OP_IN_NUMBER = "in(number)";
+             OP_SWITCH = "switch", OP_IN_NUMBER = "in(number)",
+             OP_DIVIDE = "divide", OP_ROLL = "roll";
 
 class Translator {
 public:
@@ -287,9 +288,9 @@ private:
   const array<array<OpKeyType, 3>, 6> operationTable = {
       array<OpKeyType, 3>{OP_NOOP, OP_PUSH, OP_POP},
       {OP_ADD, OP_SUBTRACT, OP_MULTIPLY},
-      {"divide", "mod", "not"},
+      {OP_DIVIDE, "mod", "not"},
       {"greater", OP_POINTER, OP_SWITCH},
-      {"duplicate", "roll", OP_IN_NUMBER},
+      {OP_DUPLICATE, OP_ROLL, OP_IN_NUMBER},
       {"in(char)", OP_OUT_NUMBER, OP_OUT_CHAR}};
 };
 } // namespace Piet
