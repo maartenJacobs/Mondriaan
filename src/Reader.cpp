@@ -2,7 +2,7 @@
 #include <iostream>
 
 namespace Piet::Parse {
-Image *Reader::readFromFile(string filename) {
+Image *Reader::readFromFile(string filename, uint32_t codelSize) {
   FILE *png = fopen(filename.c_str(), "rb");
   if (!png) {
     cout << "Unable to open test png file" << endl;
@@ -12,7 +12,7 @@ Image *Reader::readFromFile(string filename) {
   // FIXME: add more file formats.
 
   Read::PNG pngReader;
-  Image *pietImage = pngReader.readFromPNGFile(png);
+  Image *pietImage = pngReader.readFromPNGFile(png, codelSize);
 
   fclose(png);
 

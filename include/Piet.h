@@ -4,6 +4,7 @@
 #include <array>
 #include <cassert>
 #include <cstdio>
+#include <exception>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Module.h>
@@ -130,13 +131,19 @@ private:
 
 class Reader {
 public:
-  Image *readFromFile(string filename);
+  Image *readFromFile(string filename, uint32_t codelSize = 1);
 };
 
 namespace Read {
+struct CodelMismatchException : public std::exception {
+  const char *what() const noexcept override {
+    return "Image size does not seem to match specified codel size";
+  }
+};
+
 class PNG {
 public:
-  Image *readFromPNGFile(FILE *png);
+  Image *readFromPNGFile(FILE *png, uint32_t codelSize = 1);
 
 private:
   bool isValidPNGFile(FILE *png, png_structp *png_ptr, png_infop *info_ptr);

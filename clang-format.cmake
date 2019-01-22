@@ -1,4 +1,7 @@
-file(GLOB_RECURSE CLANG_FORMAT_SRC src/*.cpp include/Piet.h)
+file(GLOB_RECURSE CLANG_FORMAT_SRC
+        src/*.cpp
+        include/Piet.h
+        main.cpp)
 
 add_custom_target(
         clangformat
