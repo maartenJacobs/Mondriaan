@@ -103,12 +103,10 @@ struct Position {
 class Image {
 public:
   Image(Color **matrix, uint32_t rows, uint32_t columns)
-      : matrix(matrix), rows(rows), columns(columns) {
-    cellOwners = (uint32_t *)malloc(sizeof(uint32_t) * rows * columns);
-    for (uint32_t i = 0; i < rows * columns; i++) {
-      cellOwners[i] = 0;
-    }
-  }
+      : matrix{matrix}, rows{rows}, columns{columns},
+        cellOwners(rows * columns) // The initialisation is intended here: we
+                                   // need rows * columns elements.
+  {}
 
   ~Image();
 
@@ -124,9 +122,9 @@ public:
 
 private:
   Color **matrix;
-  uint32_t *cellOwners;
   uint32_t rows;
   uint32_t columns;
+  std::vector<uint32_t> cellOwners;
 };
 
 class Reader {

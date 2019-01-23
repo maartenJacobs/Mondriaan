@@ -16,13 +16,10 @@ void Image::fill(Position *position, Color colour) {
 }
 
 void Image::markOwner(Position *position, uint32_t owner) {
-  assert(position->row < rows);
-  assert(position->column < columns);
-
   size_t offset = position->row * columns + position->column;
-  assert(cellOwners[offset] == 0);
+  assert(cellOwners.at(offset) == 0);
 
-  cellOwners[offset] = owner;
+  cellOwners.at(offset) = owner;
 }
 
 Color Image::at(Position *position) {
