@@ -1,5 +1,6 @@
 file(GLOB_RECURSE CLANG_FORMAT_SRC
         src/*.cpp
+        test/*.cpp
         include/Piet.h
         main.cpp)
 

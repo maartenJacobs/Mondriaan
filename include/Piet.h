@@ -102,13 +102,33 @@ struct Position {
 
 class Image {
 public:
-  Image(Color **matrix, uint32_t rows, uint32_t columns)
-      : matrix{matrix}, rows{rows}, columns{columns},
+  //! \brief Create a new image with \c rows and \c columns. The image will be
+  //! initially coloured with the control colour. Use \c Image::fill to set the
+  //! colour for a point. \param rows The number of rows of the image. \param
+  //! columns The number of columns of the image.
+  Image(uint32_t rows, uint32_t columns)
+      : rows{rows}, columns{columns}, matrix{},
         cellOwners(rows * columns) // The initialisation is intended here: we
                                    // need rows * columns elements.
-  {}
+  {
+    for (uint32_t row = 0; row < rows; row++) {
+      matrix.emplace_back(std::vector<Color>(columns));
+      auto unitialisedRow = matrix.at(row);
+      for (uint32_t column = 0; column < columns; column++) {
+        unitialisedRow.at(column) = Control;
+      }
+    }
+  }
 
-  ~Image();
+  //! \brief Create a new image with an already initialised matrix.
+  //! \param matrix The already initialised matrix.
+  //! \param rows The number of rows of the image.
+  //! \param columns The number of columns of the image.
+  Image(std::vector<std::vector<Color>> matrix, uint32_t rows, uint32_t columns)
+      : rows{rows}, columns{columns}, matrix{std::move(matrix)},
+        cellOwners(rows * columns) // The initialisation is intended here: we
+  // need rows * columns elements.
+  {}
 
   void fill(Position *position, Color colour);
 
@@ -121,9 +141,9 @@ public:
   bool in(Position *position);
 
 private:
-  Color **matrix;
   uint32_t rows;
   uint32_t columns;
+  std::vector<std::vector<Color>> matrix;
   std::vector<uint32_t> cellOwners;
 };
 

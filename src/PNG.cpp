@@ -57,12 +57,8 @@ Image *PNG::readFromPNGFile(FILE *png, uint32_t codelSize) {
   png_read_end(png_ptr, nullptr);
 
   // Translate the PNG data into a color matrix.
-  auto matrix = new Color *[matrixHeight];
+  auto pietImage = new Image(matrixHeight, matrixWidth);
   for (int row = 0; row < imageHeight; row += codelSize) {
-    // Remember to downscale based on codel size. The image is using codels of
-    // size codelSize by codelSize, so we must downscale before creating a row.
-    matrix[row / codelSize] = new Color[matrixWidth];
-
     for (int column = 0; column < imageWidth; column += codelSize) {
       png_bytep pixelPointer = &row_pointers[row][column * 3];
       uint32_t pixelRgb =
@@ -86,7 +82,8 @@ Image *PNG::readFromPNGFile(FILE *png, uint32_t codelSize) {
 
       // The image can be larger than the matrix, so we need to downscale when
       // storing the codel.
-      matrix[row / codelSize][column / codelSize] = (Color)pixelRgb;
+      pietImage->fill(new Position{row / codelSize, column / codelSize},
+                      (Color)pixelRgb);
     }
   }
 
@@ -95,7 +92,6 @@ Image *PNG::readFromPNGFile(FILE *png, uint32_t codelSize) {
   // Cleanup: close file, structs and matrix.
   png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
 
-  auto pietImage = new Image(matrix, matrixHeight, matrixWidth);
   return pietImage;
 }
 
