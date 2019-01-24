@@ -26,21 +26,17 @@ brew outdated llvm@6 || brew upgrade llvm@6
 
 # Build runtime library
 cd lib
-mkdir -p build
-cd build
-cmake ..
-make
+cmake -G Ninja -B build
+cmake --build build
 
 # Build mondriaan
-cd ../..
-mkdir -p build
-cd build
-cmake .. -DLLVM_DIR=/usr/local/Cellar/llvm/6.0.1/lib/cmake/llvm
-make
+cd ..
+cmake -G Ninja -B build -DLLVM_DIR=/usr/local/Cellar/llvm/6.0.1/lib/cmake/llvm
+cmake --build build
 
 # Run mondriaan with an example program
-./mondriaan --output-file PointerTest ../examples/PointerTest.png
-LIBRARY_PATH=../lib/build/src/ clang++ PointerTest.o -lMondriaanRuntime -o PointerTest
+./build/mondriaan --output-file PointerTest examples/PointerTest.png
+LIBRARY_PATH=./lib/build/src/ clang++ PointerTest.o -lMondriaanRuntime -o PointerTest
 ```
 
 For IDEs:
