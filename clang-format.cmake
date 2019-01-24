@@ -4,9 +4,11 @@ file(GLOB_RECURSE CLANG_FORMAT_SRC
         include/Piet.h
         main.cpp)
 
+find_program(CLANG_FORMAT NAMES clang-format)
+
 add_custom_target(
         clangformat
-        COMMAND /usr/local/bin/clang-format
+        COMMAND ${CLANG_FORMAT}
         -style=LLVM
         -i
         ${CLANG_FORMAT_SRC}
