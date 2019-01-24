@@ -130,15 +130,15 @@ public:
   // need rows * columns elements.
   {}
 
-  void fill(Position *position, Color colour);
+  void fill(Position position, Color colour);
 
-  void markOwner(Position *position, uint32_t owner);
+  void markOwner(Position position, uint32_t owner);
 
-  Color at(Position *position);
+  Color at(Position position);
 
-  uint32_t ownerAt(Position *position);
+  uint32_t ownerAt(Position position);
 
-  bool in(Position *position);
+  bool in(Position position);
 
 private:
   uint32_t rows;

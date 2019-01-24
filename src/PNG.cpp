@@ -82,7 +82,7 @@ Image *PNG::readFromPNGFile(FILE *png, uint32_t codelSize) {
 
       // The image can be larger than the matrix, so we need to downscale when
       // storing the codel.
-      pietImage->fill(new Position{row / codelSize, column / codelSize},
+      pietImage->fill(Position{row / codelSize, column / codelSize},
                       (Color)pixelRgb);
     }
   }

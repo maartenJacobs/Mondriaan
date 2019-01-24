@@ -3,45 +3,45 @@
 #include <stack>
 
 namespace Piet::Parse {
-Position *move(DirectionPoint inDirection, Image *image, Position *position) {
+Position *move(DirectionPoint inDirection, Image *image, Position position) {
   Position *next = nullptr;
 
   switch (inDirection) {
   case RightTop:
-    next = new Position{position->row, position->column + 1};
+    next = new Position{position.row, position.column + 1};
     break;
   case RightBottom:
-    next = new Position{position->row, position->column + 1};
+    next = new Position{position.row, position.column + 1};
     break;
   case BottomLeft:
-    next = new Position{position->row + 1, position->column};
+    next = new Position{position.row + 1, position.column};
     break;
   case BottomRight:
-    next = new Position{position->row + 1, position->column};
+    next = new Position{position.row + 1, position.column};
     break;
   case LeftBottom:
-    if (position->column > 0) {
-      next = new Position{position->row, position->column - 1};
+    if (position.column > 0) {
+      next = new Position{position.row, position.column - 1};
     }
     break;
   case LeftTop:
-    if (position->column > 0) {
-      next = new Position{position->row, position->column - 1};
+    if (position.column > 0) {
+      next = new Position{position.row, position.column - 1};
     }
     break;
   case TopRight:
-    if (position->row > 0) {
-      next = new Position{position->row - 1, position->column};
+    if (position.row > 0) {
+      next = new Position{position.row - 1, position.column};
     }
     break;
   case TopLeft:
-    if (position->row > 0) {
-      next = new Position{position->row - 1, position->column};
+    if (position.row > 0) {
+      next = new Position{position.row - 1, position.column};
     }
     break;
   }
 
-  if (next && image->in(next)) {
+  if (next && image->in(*next)) {
     return next;
   }
 
@@ -50,9 +50,8 @@ Position *move(DirectionPoint inDirection, Image *image, Position *position) {
 
 class ExitPosition {
 public:
-  ExitPosition(Position *position, DirectionPoint direction, Image *image)
+  ExitPosition(Position position, DirectionPoint direction, Image *image)
       : position(position), direction(direction), image(image) {
-    assert(position != nullptr);
     assert(image != nullptr);
   }
 
@@ -64,16 +63,14 @@ public:
    */
   Position *next() { return move(direction, image, position); };
 
-  uint32_t getRow() { return position->row; }
+  uint32_t getRow() { return position.row; }
 
-  uint32_t getColumn() { return position->column; }
+  uint32_t getColumn() { return position.column; }
 
   DirectionPoint getDirection() { return direction; };
 
-  Position *getPosition() { return position; };
-
 private:
-  Position *position;
+  Position position;
   DirectionPoint direction;
   Image *image;
 };
@@ -86,7 +83,7 @@ struct CodelBlock {
                *rightTopExit = nullptr, *rightBottomExit = nullptr,
                *bottomLeftExit = nullptr, *bottomRightExit = nullptr,
                *leftBottomExit = nullptr, *leftTopExit = nullptr;
-  vector<Position *> visitPositions;
+  vector<Position> visitPositions;
 };
 
 DirectionPoint nextDirection(DirectionPoint current) {
@@ -116,8 +113,8 @@ DirectionPoint nextDirection(DirectionPoint current) {
 }
 
 void visitWhiteBlock(uint32_t owner, CodelBlock *whiteBlock, Image *image,
-                     Position *initialPosition) {
-  stack<Position *> visitPositions;
+                     Position initialPosition) {
+  stack<Position> visitPositions;
   visitPositions.push(initialPosition);
 
   while (!visitPositions.empty()) {
@@ -148,20 +145,19 @@ void visitWhiteBlock(uint32_t owner, CodelBlock *whiteBlock, Image *image,
     image->markOwner(position, owner);
 
     // Add positions around current position to stack.
-    if (position->row > 0) {
-      visitPositions.push(new Position{position->row - 1, position->column});
+    if (position.row > 0) {
+      visitPositions.push(Position{position.row - 1, position.column});
     }
-    visitPositions.push(new Position{position->row + 1, position->column});
-    if (position->column > 0) {
-      visitPositions.push(new Position{position->row, position->column - 1});
+    visitPositions.push(Position{position.row + 1, position.column});
+    if (position.column > 0) {
+      visitPositions.push(Position{position.row, position.column - 1});
     }
-    visitPositions.push(new Position{position->row, position->column + 1});
+    visitPositions.push(Position{position.row, position.column + 1});
   }
 }
 
-CodelBlock *visitBlock(uint32_t owner, Image *image,
-                       Position *initialPosition) {
-  stack<Position *> visitPositions;
+CodelBlock *visitBlock(uint32_t owner, Image *image, Position initialPosition) {
+  stack<Position> visitPositions;
   visitPositions.push(initialPosition);
 
   auto block = new CodelBlock;
@@ -198,71 +194,63 @@ CodelBlock *visitBlock(uint32_t owner, Image *image,
 
     // Is one of the exit points? Set exit points.
     if (block->rightTopExit == nullptr ||
-        (position->column >= block->rightTopExit->getColumn() &&
-         (position->column > block->rightTopExit->getColumn() ||
-          position->row < block->rightTopExit->getRow()))) {
-      block->rightTopExit =
-          new ExitPosition(new Position(*position), RightTop, image);
+        (position.column >= block->rightTopExit->getColumn() &&
+         (position.column > block->rightTopExit->getColumn() ||
+          position.row < block->rightTopExit->getRow()))) {
+      block->rightTopExit = new ExitPosition(position, RightTop, image);
     }
     if (block->rightBottomExit == nullptr ||
-        (position->column >= block->rightBottomExit->getColumn() &&
-         (position->column > block->rightBottomExit->getColumn() ||
-          position->row > block->rightBottomExit->getRow()))) {
-      block->rightBottomExit =
-          new ExitPosition(new Position(*position), RightBottom, image);
+        (position.column >= block->rightBottomExit->getColumn() &&
+         (position.column > block->rightBottomExit->getColumn() ||
+          position.row > block->rightBottomExit->getRow()))) {
+      block->rightBottomExit = new ExitPosition(position, RightBottom, image);
     }
     if (block->bottomRightExit == nullptr ||
-        (position->row >= block->bottomRightExit->getRow() &&
-         (position->row > block->bottomRightExit->getRow() ||
-          position->column > block->bottomRightExit->getColumn()))) {
-      block->bottomRightExit =
-          new ExitPosition(new Position(*position), BottomRight, image);
+        (position.row >= block->bottomRightExit->getRow() &&
+         (position.row > block->bottomRightExit->getRow() ||
+          position.column > block->bottomRightExit->getColumn()))) {
+      block->bottomRightExit = new ExitPosition(position, BottomRight, image);
     }
     if (block->bottomLeftExit == nullptr ||
-        (position->row >= block->bottomLeftExit->getRow() &&
-         (position->row > block->bottomLeftExit->getRow() ||
-          position->column < block->bottomLeftExit->getColumn()))) {
-      block->bottomLeftExit =
-          new ExitPosition(new Position(*position), BottomLeft, image);
+        (position.row >= block->bottomLeftExit->getRow() &&
+         (position.row > block->bottomLeftExit->getRow() ||
+          position.column < block->bottomLeftExit->getColumn()))) {
+      block->bottomLeftExit = new ExitPosition(position, BottomLeft, image);
     }
     if (block->leftBottomExit == nullptr ||
-        (position->column <= block->leftBottomExit->getColumn() &&
-         (position->column < block->leftBottomExit->getColumn() ||
-          position->row > block->leftBottomExit->getRow()))) {
-      block->leftBottomExit =
-          new ExitPosition(new Position(*position), LeftBottom, image);
+        (position.column <= block->leftBottomExit->getColumn() &&
+         (position.column < block->leftBottomExit->getColumn() ||
+          position.row > block->leftBottomExit->getRow()))) {
+      block->leftBottomExit = new ExitPosition(position, LeftBottom, image);
     }
     if (block->leftTopExit == nullptr ||
-        (position->column <= block->leftTopExit->getColumn() &&
-         (position->column < block->leftTopExit->getColumn() ||
-          position->row < block->leftTopExit->getRow()))) {
-      block->leftTopExit =
-          new ExitPosition(new Position(*position), LeftTop, image);
+        (position.column <= block->leftTopExit->getColumn() &&
+         (position.column < block->leftTopExit->getColumn() ||
+          position.row < block->leftTopExit->getRow()))) {
+      block->leftTopExit = new ExitPosition(position, LeftTop, image);
     }
     if (block->topLeftExit == nullptr ||
-        (position->row <= block->topLeftExit->getRow() &&
-         (position->row < block->topLeftExit->getRow() ||
-          position->column < block->topLeftExit->getColumn()))) {
-      block->topLeftExit =
-          new ExitPosition(new Position(*position), TopLeft, image);
+        (position.row <= block->topLeftExit->getRow() &&
+         (position.row < block->topLeftExit->getRow() ||
+          position.column < block->topLeftExit->getColumn()))) {
+      block->topLeftExit = new ExitPosition(position, TopLeft, image);
     }
     if (block->topRightExit == nullptr ||
-        (position->row <= block->topRightExit->getRow() &&
-         (position->row < block->topRightExit->getRow() ||
-          position->column > block->topRightExit->getColumn()))) {
-      block->topRightExit =
-          new ExitPosition(new Position(*position), TopRight, image);
+        (position.row <= block->topRightExit->getRow() &&
+         (position.row < block->topRightExit->getRow() ||
+          position.column > block->topRightExit->getColumn()))) {
+      block->topRightExit = new ExitPosition(position, TopRight, image);
     }
 
     // Add positions around current position to stack.
-    if (position->row > 0) {
-      visitPositions.push(new Position{position->row - 1, position->column});
+    if (position.row > 0) {
+      visitPositions.push(Position{position.row - 1, position.column});
     }
-    visitPositions.push(new Position{position->row + 1, position->column});
-    if (position->column > 0) {
-      visitPositions.push(new Position{position->row, position->column - 1});
+    visitPositions.push(Position{position.row + 1, position.column});
+    if (position.column > 0) {
+      visitPositions.push(Position{position.row, position.column - 1});
     }
-    visitPositions.push(new Position{position->row, position->column + 1});
+    visitPositions.push(Position{position.row, position.column + 1});
   }
 
   return block;
@@ -314,25 +302,24 @@ class WhiteBlockParser {
 public:
   explicit WhiteBlockParser(Image *image) : image(image) {}
 
-  GraphEdge *parse(Position *previousCodelPosition, Position *startPosition,
-                   DirectionPoint startDirection,
+  GraphEdge *parse(Position startPosition, DirectionPoint startDirection,
                    const vector<CodelBlock *> &blocks) {
     DirectionPoint currentDirection = startDirection;
-    auto currentPosition = new Position(*startPosition);
+    auto currentPosition = Position(startPosition);
     for (uint8_t attempts = 0; attempts < 4; attempts++) {
       Position *nextPosition = nullptr;
       while ((nextPosition = move(currentDirection, image, currentPosition)) !=
              nullptr) {
-        auto nextOwner = blocks.at(image->ownerAt(nextPosition) - 1);
+        auto nextOwner = blocks.at(image->ownerAt(*nextPosition) - 1);
         auto currentColor = nextOwner->color;
         if (currentColor == Black) {
           break;
         } else if (currentColor == White) {
-          currentPosition = nextPosition;
+          currentPosition = *nextPosition;
           continue;
         } else {
           // We've found a coloured codel.
-          currentPosition = nextPosition;
+          currentPosition = *nextPosition;
           auto colouredBlockOwner =
               blocks.at(image->ownerAt(currentPosition) - 1);
           return new GraphEdge{new DirectionPoint{currentDirection},
@@ -364,13 +351,14 @@ GraphEdge *edgeFromExitPosition(Image *image,
         new DirectionPoint{nextDirection(exit->getDirection())});
   }
 
-  auto owner = blocks.at(image->ownerAt(ownerPosition) - 1);
+  auto owner = blocks.at(image->ownerAt(*ownerPosition) - 1);
   if (owner->color == Black) {
     return new GraphEdge(
         new DirectionPoint{nextDirection(exit->getDirection())});
   } else if (owner->color == White) {
-    return whiteBlockParser->parse(exit->getPosition(), exit->next(),
-                                   exit->getDirection(), blocks);
+    // TODO: what if exit->next() == nullptr?
+    return whiteBlockParser->parse(*(exit->next()), exit->getDirection(),
+                                   blocks);
   } else {
     return new GraphEdge(new DirectionPoint{exit->getDirection()},
                          owner->constructingNode, false);
@@ -378,8 +366,8 @@ GraphEdge *edgeFromExitPosition(Image *image,
 }
 
 Graph *Parser::parse() {
-  stack<Position *> visitPositions;
-  visitPositions.push(new Position{0, 0});
+  stack<Position> visitPositions;
+  visitPositions.push(Position{0, 0});
   uint32_t cellOwner = 0;
   vector<CodelBlock *> blocks;
   vector<GraphNode *> nodes;
@@ -411,29 +399,45 @@ Graph *Parser::parse() {
 
     // For each 8 exit points that are unvisited, create a graph node starting
     // from that point.
-    if (block->topLeftExit && block->topLeftExit->next()) {
-      visitPositions.push(block->topLeftExit->next());
+    if (block->topLeftExit) {
+      if (auto next = block->topLeftExit->next()) {
+        visitPositions.push(*next);
+      }
     }
-    if (block->topRightExit && block->topRightExit->next()) {
-      visitPositions.push(block->topRightExit->next());
+    if (block->topRightExit) {
+      if (auto next = block->topRightExit->next()) {
+        visitPositions.push(*next);
+      }
     }
-    if (block->bottomLeftExit && block->bottomLeftExit->next()) {
-      visitPositions.push(block->bottomLeftExit->next());
+    if (block->bottomLeftExit) {
+      if (auto next = block->bottomLeftExit->next()) {
+        visitPositions.push(*next);
+      }
     }
-    if (block->bottomRightExit && block->bottomRightExit->next()) {
-      visitPositions.push(block->bottomRightExit->next());
+    if (block->bottomRightExit) {
+      if (auto next = block->bottomRightExit->next()) {
+        visitPositions.push(*next);
+      }
     }
-    if (block->leftBottomExit && block->leftBottomExit->next()) {
-      visitPositions.push(block->leftBottomExit->next());
+    if (block->leftBottomExit) {
+      if (auto next = block->leftBottomExit->next()) {
+        visitPositions.push(*next);
+      }
     }
-    if (block->leftTopExit && block->leftTopExit->next()) {
-      visitPositions.push(block->leftTopExit->next());
+    if (block->leftTopExit) {
+      if (auto next = block->leftTopExit->next()) {
+        visitPositions.push(*next);
+      }
     }
-    if (block->rightTopExit && block->rightTopExit->next()) {
-      visitPositions.push(block->rightTopExit->next());
+    if (block->rightTopExit) {
+      if (auto next = block->rightTopExit->next()) {
+        visitPositions.push(*next);
+      }
     }
-    if (block->rightBottomExit && block->rightBottomExit->next()) {
-      visitPositions.push(block->rightBottomExit->next());
+    if (block->rightBottomExit) {
+      if (auto next = block->rightBottomExit->next()) {
+        visitPositions.push(*next);
+      }
     }
 
     // Push the marked visit positions.
