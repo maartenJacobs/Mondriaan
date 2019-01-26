@@ -136,3 +136,16 @@ Credit for the examples go to their respective creators:
 
 - PietHello.png originated from http://www.dangermouse.net/esoteric/piet/samples.html
 - PointerTest.png was created using `npietedit`
+
+## TODO
+
+- Add more integration tests. They're the best method of confirming compatibility with existing compilers and
+interpreters.
+- Support all operations. Some of the operations are not yet supported because they were not needed for simple test
+programs. For the sake of completing this self-afflicted task, the remaining operations should at least be supported
+with most edge cases covered (e.g. negative rolls).
+- Use modern C++. The initial implementation helped me learn a bit of C++ and LLVM, but it used horribly outdated C++. I'd
+not even heard of C++11 (and beyond) before I started this project and the memory management alone shows that fact. Using
+modern C++ should at least prevent memory issues.
+- Add more tooling. Profiling would be useful to confirm memory issues and a need for modern C++. Clang-tidy and
+clang-format would be useful to provide a consistent codebase.
