@@ -53,3 +53,5 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Weverything -g -O0")
 
 # Include third-party tools.
 include(clang-format.cmake)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
